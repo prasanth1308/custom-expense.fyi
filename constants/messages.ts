@@ -25,7 +25,7 @@ const messages = {
 };
 
 export const emails = {
-	email: 'hello@expense.fyi',
+	email: 'onboarding@resend.dev',
 	feedback: {
 		subject: '🎉 New Feedback Received',
 		sent: 'Feedback received.',
@@ -52,7 +52,7 @@ export const emails = {
 		},
 	},
 	sent: 'We just sent an email with magic link, check your inbox.',
-	from: 'Gokul from Expense.fyi <hello@expense.fyi>',
+	from: 'Prasanth from Expense.fyi <onboarding@resend.dev>',
 	signin: { subject: 'Sign in link for Expense.fyi' },
 	signup: { subject: 'Sign up link for Expense.fyi' },
 };

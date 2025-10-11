@@ -39,8 +39,10 @@ export const AuthProvider = (props: any) => {
 	const { accessToken, user, children, ...others } = props;
 
 	useEffect(() => {
-		const searchParams = new URLSearchParams(window?.location?.hash ?? '');
-		const access_token = searchParams.get('#access_token');
+		// Remove the # from the hash and parse the parameters
+		const hashParams = window?.location?.hash?.substring(1) ?? '';
+		const searchParams = new URLSearchParams(hashParams);
+		const access_token = searchParams.get('access_token');
 		const refresh_token = searchParams.get('refresh_token');
 
 		if (access_token && refresh_token) {

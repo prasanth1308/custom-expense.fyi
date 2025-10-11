@@ -10,9 +10,12 @@ export function cn(...inputs: ClassValue[]) {
 const isProduction = process.env.NODE_ENV === 'production';
 
 export const getRedirectUrl = () => {
+	// debugger;
 	let url = process?.env?.NEXT_PUBLIC_SITE_URL ?? urls.app.overview;
 	// Make sure to include `https://` when not localhost.
 	url = isProduction ? `https:${url}` : `http://app.${url}`;
+	console.log('url', url);
+	// return new Error();
 	// Make sure to including trailing `/`.
 	url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
 	return url;
