@@ -10,13 +10,16 @@ export async function middleware(req: NextRequest) {
 	const hostname = req.headers.get('host');
 	const url = req.nextUrl;
 
-	const currentHost = hostname?.replace(`.${urls.homeWithoutApp}`, '');
+	// Get base domain dynamically
+	const baseDomain = urls.homeWithoutApp;
+	const currentHost = hostname?.replace(`.${baseDomain}`, '');
 
 	const supabase = createMiddlewareClient({ req, res });
 	const { data } = await supabase.auth.getSession();
 	const { session } = data;
 
-	if (currentHost === 'app') {
+	// Handle app subdomain or app.* hostname
+	if (currentHost === 'app' || hostname?.startsWith('app.')) {
 		if (url.pathname === '/signin' || url.pathname === '/signup') {
 			if (session) {
 				url.pathname = '/';

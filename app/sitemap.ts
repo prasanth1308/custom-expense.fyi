@@ -1,37 +1,41 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'solaiexp.vercel.app';
+	const isProduction = process.env.NODE_ENV === 'production';
+	const protocol = isProduction ? 'https://' : 'http://';
+	
 	return [
 		{
-			url: 'https://expense.fyi',
+			url: `${protocol}${baseUrl}`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi',
+			url: `${protocol}app.${baseUrl}`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/signin',
+			url: `${protocol}app.${baseUrl}/signin`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/siginup',
+			url: `${protocol}app.${baseUrl}/signup`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/expenses',
+			url: `${protocol}app.${baseUrl}/expenses`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/income',
+			url: `${protocol}app.${baseUrl}/income`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/investments',
+			url: `${protocol}app.${baseUrl}/investments`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/settings',
+			url: `${protocol}app.${baseUrl}/settings`,
 			lastModified: new Date(),
 		},
 	];

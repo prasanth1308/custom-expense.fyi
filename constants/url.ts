@@ -3,19 +3,34 @@ import { views } from './table';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const domain = 'solaiexp.vercel.app';
-const local = 'localhost:3000';
-const home = isProduction ? domain : local;
+// Get the base domain from environment variable or fallback to Vercel URL
+const getBaseDomain = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.host;
+  }
+  
+  // Server-side: check environment variables
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL;
+  if (siteUrl) {
+    return siteUrl.replace(/^https?:\/\//, '');
+  }
+  
+  // Fallback
+  return isProduction ? 'solaiexp.vercel.app' : 'localhost:3000';
+};
+
+const baseDomain = getBaseDomain();
+const protocol = isProduction ? 'https://' : 'http://';
 
 const url = {
-	homeWithoutApp: home,
-	home: `//${home}`,
-	api: `${isProduction ? 'https://app.' : 'http://app.'}${home}`,
-	serverApi: `${isProduction ? 'https://' : 'http://'}${home}`,
+	homeWithoutApp: baseDomain,
+	home: `${protocol}${baseDomain}`,
+	api: `${protocol}app.${baseDomain}`,
+	serverApi: `${protocol}${baseDomain}`,
 	app: {
-		signin: `//app.${home}/signin`,
-		signup: `//app.${home}/signup`,
-		overview: `//app.${home}`,
+		signin: `${protocol}app.${baseDomain}/signin`,
+		signup: `${protocol}app.${baseDomain}/signup`,
+		overview: `${protocol}app.${baseDomain}`,
 	},
 	twitter: 'https://twitter.com/gokul_i',
 	github: 'https://github.com/gokulkrishh/expense.fyi',
