@@ -8,6 +8,7 @@ import AddData from './add-data';
 import Charts from './charts';
 
 export default async function Page() {
+	console.log('Dashboard page rendering');
 	return (
 		<>
 			<DatePickerProvider>

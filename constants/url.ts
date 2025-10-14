@@ -16,7 +16,7 @@ const getBaseDomain = () => {
   }
   
   // Fallback
-  return isProduction ? 'solaiexp.vercel.app' : 'localhost:3000';
+  return isProduction ? 'solaiexp.vercel.app' : 'localhost:3002';
 };
 
 const baseDomain = getBaseDomain();
@@ -25,12 +25,12 @@ const protocol = isProduction ? 'https://' : 'http://';
 const url = {
 	homeWithoutApp: baseDomain,
 	home: `${protocol}${baseDomain}`,
-	api: `${protocol}app.${baseDomain}`,
+	api: `${protocol}${baseDomain}`,
 	serverApi: `${protocol}${baseDomain}`,
 	app: {
-		signin: `${protocol}app.${baseDomain}/signin`,
-		signup: `${protocol}app.${baseDomain}/signup`,
-		overview: `${protocol}app.${baseDomain}`,
+		signin: '/signin',
+		signup: '/signup',
+		overview: '/',
 	},
 	twitter: 'https://twitter.com/gokul_i',
 	github: 'https://github.com/gokulkrishh/expense.fyi',

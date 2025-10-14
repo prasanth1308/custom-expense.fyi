@@ -1,16 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/dashboard/$1",
-      "has": [
-        {
-          "type": "host",
-          "value": "app.solaiexp.vercel.app"
-        }
-      ]
-    }
-  ],
+
   "headers": [
     {
       "source": "/(.*)",

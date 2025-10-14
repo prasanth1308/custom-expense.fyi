@@ -52,6 +52,7 @@ export default async function Layout({ children }: any) {
 		data: { session },
 	} = await supabase.auth.getSession();
 	const user = await getUser(cookies());
+	console.log('User from layout', user);
 
 	return (
 		<>

@@ -10,21 +10,21 @@ export function cn(...inputs: ClassValue[]) {
 const isProduction = process.env.NODE_ENV === 'production';
 
 export const getRedirectUrl = () => {
-	const siteUrl = process?.env?.NEXT_PUBLIC_SITE_URL || process?.env?.VERCEL_URL;
-	
-	if (!siteUrl) {
-		return isProduction ? 'https://app.solaiexp.vercel.app/' : 'http://app.localhost:3000/';
+	console.log('Getting redirect URL');
+	// Use current domain for redirects to dashboard
+	if (typeof window !== 'undefined') {
+		return `${window.location.protocol}//${window.location.host}/dashboard`;
 	}
 	
-	// Clean the URL (remove protocol if present)
-	const cleanUrl = siteUrl.replace(/^https?:\/\//, '');
+	// Server-side fallback
+	const siteUrl = process?.env?.NEXT_PUBLIC_SITE_URL || process?.env?.VERCEL_URL;
 	
-	// Build the URL with proper protocol and subdomain
-	let url = isProduction 
-		? `https://app.${cleanUrl}` 
-		: `http://app.${cleanUrl}`;
+	if (siteUrl) {
+		const cleanUrl = siteUrl.replace(/^https?:\/\//, '');
+		const protocol = isProduction ? 'https://' : 'http://';
+		return `${protocol}${cleanUrl}/dashboard`;
+	}
 	
-	// Make sure to include trailing `/`.
-	url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
-	return url;
+	// Final fallback
+	return isProduction ? 'https://solaiexp.vercel.app/dashboard' : 'http://localhost:3002/dashboard';
 };

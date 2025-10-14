@@ -10,7 +10,7 @@ const nextConfig = {
 };
 
 const ContentSecurityPolicy = `
-    default-src 'self' *.solaiexp.vercel.app *.vercel.app expense.fyi;
+    default-src 'self' *.vercel.app expense.fyi;
     script-src 'self' 'unsafe-eval' 'unsafe-inline' app.lemonsqueezy.com *.cloudfront.net assets.lemonsqueezy.com *.googletagmanager.com;
     child-src 'self' expensefyi.lemonsqueezy.com;
     style-src 'self' 'unsafe-inline';
