@@ -3,29 +3,43 @@ import type { NextRequest } from 'next/server';
 
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
-import urls from 'constants/url';
-
 export async function middleware(req: NextRequest) {
 	const res = NextResponse.next();
-	const hostname = req.headers.get('host');
 	const url = req.nextUrl;
-
-	const currentHost = hostname?.replace(`.${urls.homeWithoutApp}`, '');
 
 	const supabase = createMiddlewareClient({ req, res });
 	const { data } = await supabase.auth.getSession();
 	const { session } = data;
 
-	if (currentHost === 'app') {
-		if (url.pathname === '/signin' || url.pathname === '/signup') {
-			if (session) {
-				url.pathname = '/';
-				return NextResponse.redirect(url);
-			}
+	// Handle authentication redirects
+	if (url.pathname === '/signin' || url.pathname === '/signup') {
+		if (session) {
+			url.pathname = '/';
+			return NextResponse.redirect(url);
+		}
+		return res;
+	}
+
+	// Handle dashboard routes - rewrite to dashboard pages
+	if (url.pathname.startsWith('/dashboard') || 
+		url.pathname === '/' || 
+		url.pathname.startsWith('/expenses') || 
+		url.pathname.startsWith('/income') || 
+		url.pathname.startsWith('/investments') || 
+		url.pathname.startsWith('/subscriptions') || 
+		url.pathname.startsWith('/settings')) {
+		
+		// If it's already a dashboard route, let it pass through
+		if (url.pathname.startsWith('/dashboard')) {
 			return res;
 		}
-
-		url.pathname = `/dashboard${url.pathname}`;
+		
+		// Rewrite other routes to dashboard
+		if (url.pathname === '/') {
+			url.pathname = '/dashboard';
+		} else if (!url.pathname.startsWith('/dashboard')) {
+			url.pathname = `/dashboard${url.pathname}`;
+		}
 		return NextResponse.rewrite(url);
 	}
 

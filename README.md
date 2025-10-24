@@ -47,9 +47,14 @@ Expense.fyi is an open-source application to effortlessly track and manage your 
 | Path      | Production             | Local                     |
 | --------- | ---------------------- | ------------------------- |
 | Home      | /                      | /                         |
-| Signup    | app.expense.fyi/signup | app.localhost:3000/signup |
-| Signin    | app.expense.fyi/signin | app.localhost:3000/signin |
-| Dashboard | app.expense.fyi        | app.localhost:3000        |
+| Signup    | /signup                | /signup                   |
+| Signin    | /signin                | /signin                   |
+| Dashboard | /                      | /                         |
+| Expenses  | /expenses              | /expenses                 |
+| Income    | /income                | /income                   |
+| Investments | /investments          | /investments              |
+| Subscriptions | /subscriptions      | /subscriptions            |
+| Settings  | /settings              | /settings                 |
 
 ## Contributions
 

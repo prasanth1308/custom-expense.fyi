@@ -17,8 +17,8 @@ import {
 import Footer from './footer';
 import Footnote from './footnote';
 
-const baseUrl = 'https://expense.fyi';
-const appUrl = 'https://app.expense.fyi';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi';
+const appUrl = baseUrl;
 const githubUrl = 'https://github.com/gokulkrishh/expense.fyi';
 const twitterUrl = 'https://twitter.com/gokul_i';
 const demoVideoUrl = `https://www.youtube.com/watch?v=faueh3BZXCo`;

@@ -1,37 +1,39 @@
 import { MetadataRoute } from 'next';
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi';
+
 export default function sitemap(): MetadataRoute.Sitemap {
 	return [
 		{
-			url: 'https://expense.fyi',
+			url: baseUrl,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi',
+			url: `${baseUrl}/signin`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/signin',
+			url: `${baseUrl}/signup`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/siginup',
+			url: `${baseUrl}/expenses`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/expenses',
+			url: `${baseUrl}/income`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/income',
+			url: `${baseUrl}/investments`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/investments',
+			url: `${baseUrl}/subscriptions`,
 			lastModified: new Date(),
 		},
 		{
-			url: 'https://app.expense.fyi/settings',
+			url: `${baseUrl}/settings`,
 			lastModified: new Date(),
 		},
 	];
