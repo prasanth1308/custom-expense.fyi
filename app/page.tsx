@@ -222,7 +222,7 @@ export default function Home() {
 								</div>
 								<a
 									className="mt-10 block w-full rounded-md bg-white py-2 text-center text-sm font-semibold text-black hover:bg-gray-200"
-									href="https://app.expense.fyi/signup"
+									href={url.app.signup}
 								>
 									Start for free
 								</a>
@@ -320,7 +320,7 @@ export default function Home() {
 								</div>
 								<a
 									className="mt-10 flex w-full justify-center rounded-md bg-white py-2 text-center text-sm font-semibold text-black hover:bg-gray-200"
-									href="https://app.expense.fyi/signup"
+									href={url.app.signup}
 								>
 									Get started
 								</a>

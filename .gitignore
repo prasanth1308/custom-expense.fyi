@@ -38,3 +38,5 @@ next-env.d.ts
 
 # others
 .husky
+.env
+.env.vercel

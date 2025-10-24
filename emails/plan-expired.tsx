@@ -18,7 +18,7 @@ import Footer from './footer';
 import Footnote from './footnote';
 
 const baseUrl = 'https://expense.fyi';
-const settingUrl = 'https://app.expense.fyi/settings';
+const settingUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi'}/settings`;
 
 type PlanExpiredProps = { plan?: string };
 
