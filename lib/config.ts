@@ -38,7 +38,7 @@ const getAppConfig = (): AppConfig => {
 		
 		// Server-side: use environment variables or fallback
 		if (isProduction) {
-			return process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, '') || 'expense.fyi';
+			return process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, '') || 'solaiexp.vercel.app';
 		}
 		
 		// Local development
@@ -69,12 +69,12 @@ const getAppConfig = (): AppConfig => {
 		contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || `hello@${domain}`,
 		
 		// Social links
-		githubUrl: process.env.NEXT_PUBLIC_GITHUB_URL || 'https://github.com/gokulkrishh/expense.fyi',
-		twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || 'https://twitter.com/gokul_i',
+		githubUrl: process.env.NEXT_PUBLIC_GITHUB_URL || 'https://github.com/prasanth1308/custom-expense.fyi',
+		twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || 'https://twitter.com/prasanth1308',
 		
 		// Author information
-		authorName: process.env.NEXT_PUBLIC_AUTHOR_NAME || 'Gokul',
-		authorTwitter: process.env.NEXT_PUBLIC_AUTHOR_TWITTER || '@gokul_i',
+		authorName: process.env.NEXT_PUBLIC_AUTHOR_NAME || 'Prasanth Ravi',
+		authorTwitter: process.env.NEXT_PUBLIC_AUTHOR_TWITTER || '@prasanth1308',
 	};
 };
 

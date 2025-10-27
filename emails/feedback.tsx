@@ -4,7 +4,7 @@ import { Body, Container, Head, Heading, Html, Img, Preview, Section, Tailwind, 
 
 import Footer from './footer';
 
-const baseUrl = 'https://expense.fyi';
+const baseUrl = 'https://solaiexp.vercel.app';
 
 export default function FeedbackEmail({ message = '', email = '' }: { message?: string; email?: string }) {
 	return (
