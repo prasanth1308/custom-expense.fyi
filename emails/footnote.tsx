@@ -1,4 +1,5 @@
 import { Text } from '@react-email/components';
+import { getAuthorName, getAppName } from 'lib/config';
 
 export default function Footnote({ hideNote }: { hideNote?: boolean }) {
 	return (
@@ -10,7 +11,7 @@ export default function Footnote({ hideNote }: { hideNote?: boolean }) {
 			) : null}
 			<Text style={{ ...text, color: '#666666' }}>
 				Cheers, <br />
-				Gokul from Expense.fyi
+				{getAuthorName()} from {getAppName()}
 			</Text>
 		</>
 	);

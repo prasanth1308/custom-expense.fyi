@@ -16,9 +16,10 @@ import {
 
 import Footer from './footer';
 import Footnote from './footnote';
+import { getAppBaseUrl, getAppName } from 'lib/config';
 
-const baseUrl = 'https://expense.fyi';
-const settingUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi'}/settings`;
+const baseUrl = getAppBaseUrl();
+const settingUrl = `${getAppBaseUrl()}/settings`;
 
 type PlanExpiredProps = { plan?: string };
 
@@ -42,7 +43,7 @@ export default function PlanExpiredEmail({ plan = 'Premium Plan' }: PlanExpiredP
 						</Text>
 						<Text className="text-black text-[14px] leading-[24px]">
 							No worries, all data still there. Renew <b>Premium Plan</b> to continue enjoying premium features on
-							Expense.fyi.
+							{getAppName()}.
 						</Text>
 						<Link
 							className="bg-[#000000] inline-block p-2.5 px-3 rounded-md text-white text-[12px] font-medium no-underline text-center"

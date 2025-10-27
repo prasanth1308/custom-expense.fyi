@@ -22,6 +22,7 @@ import {
 import { Separator } from 'components/ui/separator';
 
 import { cn } from 'lib/utils';
+import { getAppName, getSupportEmail } from 'lib/config';
 
 import shortcuts from 'constants/shortcuts';
 
@@ -46,7 +47,7 @@ const dashboardLinks = [
 ];
 
 const settingsLinks = [
-	{ href: 'mailto:support@expense.fyi', name: 'Support', Icon: SupportIcon },
+	{ href: `mailto:${getSupportEmail()}`, name: 'Support', Icon: SupportIcon },
 	{ href: '/settings', name: 'Settings', Icon: SettingsIcon },
 ];
 
@@ -101,7 +102,7 @@ export default function Sidebar() {
 								href="/"
 								className="mt-[3px] active:scale-95 rounded-lg p-1 transition-all focus:outline-none"
 							>
-								<Image className="block" src={SvgWhiteLogo} width={30} height={30} alt="Expense.fyi" />
+								<Image className="block" src={SvgWhiteLogo} width={30} height={30} alt={getAppName()} />
 							</Link>
 							<Separator className="mb-2 mt-[8px] border-t border-gray-100 opacity-[0.2]" />
 							{dashboardLinks.map((link, index) => {

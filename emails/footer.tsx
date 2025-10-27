@@ -1,6 +1,7 @@
 import { Hr, Link, Text } from '@react-email/components';
+import { getAppBaseUrl, getAppName } from 'lib/config';
 
-const baseUrl = 'https://expense.fyi';
+const baseUrl = getAppBaseUrl();
 
 export default function Footer() {
 	return (
@@ -9,7 +10,7 @@ export default function Footer() {
 			<Text style={footer}>
 				&copy; {new Date().getFullYear()}{' '}
 				<Link href={baseUrl} target="_blank" style={{ ...link, textDecoration: 'underline' }}>
-					Expense.fyi
+					{getAppName()}
 				</Link>{' '}
 				· Effortlessly track and manage your expenses.
 			</Text>

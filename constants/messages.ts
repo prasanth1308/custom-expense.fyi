@@ -1,3 +1,5 @@
+import { getAppName, getContactEmail, getAuthorName } from 'lib/config';
+
 const messages = {
 	success: 'Successfully added!',
 	updated: 'Successfully updated!',
@@ -25,17 +27,17 @@ const messages = {
 };
 
 export const emails = {
-	email: 'hello@expense.fyi',
+	email: getContactEmail(),
 	feedback: {
 		subject: '🎉 New Feedback Received',
 		sent: 'Feedback received.',
 		failed: 'Failed to send, please try again.',
 	},
 	account: {
-		deleted: 'Your Expense.fyi account is Deleted!',
+		deleted: `Your ${getAppName()} account is Deleted!`,
 	},
 	welcome: {
-		subject: '✨ Welcome to Expense.fyi',
+		subject: `✨ Welcome to ${getAppName()}`,
 	},
 	usageLimit: {
 		premiumExpired: {
@@ -52,9 +54,9 @@ export const emails = {
 		},
 	},
 	sent: 'We just sent an email with magic link, check your inbox.',
-	from: 'Gokul from Expense.fyi <onboarding@resend.dev>',
-	signin: { subject: 'Sign in link for Expense.fyi' },
-	signup: { subject: 'Sign up link for Expense.fyi' },
+	from: `${getAuthorName()} from ${getAppName()} <onboarding@resend.dev>`,
+	signin: { subject: `Sign in link for ${getAppName()}` },
+	signup: { subject: `Sign up link for ${getAppName()}` },
 };
 
 export default messages;

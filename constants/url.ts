@@ -1,9 +1,10 @@
 import { getRangeDateForFilter } from './date';
 import { views } from './table';
+import { getAppBaseUrl, getAppDomain, getTwitterUrl, getGithubUrl } from 'lib/config';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Get the current host URL
+// Get the current host URL dynamically
 const getCurrentHost = () => {
 	if (typeof window !== 'undefined') {
 		// Client-side: use current host
@@ -12,7 +13,7 @@ const getCurrentHost = () => {
 	
 	// Server-side: use environment variables or fallback
 	if (isProduction) {
-		return process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi';
+		return process.env.NEXT_PUBLIC_SITE_URL || getAppBaseUrl();
 	}
 	
 	// Local development
@@ -20,7 +21,7 @@ const getCurrentHost = () => {
 	return `http://localhost:${port}`;
 };
 
-const domain = 'expense.fyi';
+const domain = getAppDomain();
 const local = `localhost:${process.env.NEXT_PUBLIC_SITE_PORT || '3000'}`;
 const home = isProduction ? domain : local;
 
@@ -34,8 +35,8 @@ const url = {
 		signup: `//${home}/signup`,
 		overview: `//${home}`,
 	},
-	twitter: 'https://twitter.com/gokul_i',
-	github: 'https://github.com/gokulkrishh/expense.fyi',
+	twitter: getTwitterUrl(),
+	github: getGithubUrl(),
 };
 
 export const getApiUrl = (filterKey: string, apiPath: string, categories: string[] = [], isNotRange = false) => {

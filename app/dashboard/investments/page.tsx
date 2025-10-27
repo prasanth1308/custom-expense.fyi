@@ -1,10 +1,11 @@
 import { DataContextProvider } from 'components/context/data-provider';
 import LayoutHeader from 'components/layout/header';
+import { getAppName } from 'lib/config';
 
 import InvestmentsSummary from './summary';
 import DataTable from './table';
 
-const title = 'Expense.fyi – Investments';
+const title = `${getAppName()} – Investments`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 export const metadata = {

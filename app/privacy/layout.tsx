@@ -1,4 +1,6 @@
-const title = 'Expense.fyi – Privacy Policy';
+import { getAppName } from 'lib/config';
+
+const title = `${getAppName()} – Privacy Policy`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 export const metadata = {

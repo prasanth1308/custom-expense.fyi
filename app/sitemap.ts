@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { getAppBaseUrl } from 'lib/config';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi';
+const baseUrl = getAppBaseUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	return [

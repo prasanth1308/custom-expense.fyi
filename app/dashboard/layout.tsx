@@ -14,6 +14,7 @@ import { Toaster } from 'components/ui/sonner';
 
 import { apiUrls } from 'lib/apiUrls';
 import { Database } from 'lib/database.types';
+import { getAppName } from 'lib/config';
 
 import url from 'constants/url';
 
@@ -26,7 +27,7 @@ const supabaseOption = {
 	supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
 };
 
-const title = 'Expense.fyi – Overview';
+const title = `${getAppName()} – Overview`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 export const metadata = {

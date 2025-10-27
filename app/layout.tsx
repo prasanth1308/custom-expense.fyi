@@ -4,10 +4,11 @@ import Script from 'next/script';
 
 import './globals.css';
 import './overwrites.css';
+import { getAppName, getAppTagline, getAppBaseUrl } from 'lib/config';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const title = 'Expense.fyi – Track your expenses with ease';
+const title = `${getAppName()} – ${getAppTagline()}`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 const GOOGLE_ANALYTICS_ID = process.env.GA4_ANALYTICS_ID;
@@ -15,30 +16,30 @@ const GOOGLE_ANALYTICS_ID = process.env.GA4_ANALYTICS_ID;
 export const metadata = {
 	title,
 	description,
-	manifest: 'https://expense.fyi/manifest.json',
+	manifest: `${getAppBaseUrl()}/manifest.json`,
 	twitter: {
 		card: 'summary_large_image',
 		title,
 		description,
 		creator: '@gokul_i',
-		images: ['https://expense.fyi/og.jpg'],
+		images: [`${getAppBaseUrl()}/og.jpg`],
 	},
 	openGraph: {
 		title,
 		description,
-		url: 'https://expense.fyi',
+		url: getAppBaseUrl(),
 		type: 'website',
-		images: ['https://expense.fyi/og.jpg'],
+		images: [`${getAppBaseUrl()}/og.jpg`],
 	},
 	icons: {
-		icon: 'https://expense.fyi/icons/icon.svg',
-		shortcut: 'https://expense.fyi/favicon.ico',
-		apple: 'https://expense.fyi/icons/apple-icon.png',
+		icon: `${getAppBaseUrl()}/icons/icon.svg`,
+		shortcut: `${getAppBaseUrl()}/favicon.ico`,
+		apple: `${getAppBaseUrl()}/icons/apple-icon.png`,
 	},
 	appleWebApp: {
 		title,
 		statusBarStyle: 'black',
-		startupImage: ['https://expense.fyi/icons/apple-icon.png'],
+		startupImage: [`${getAppBaseUrl()}/icons/apple-icon.png`],
 	},
 };
 

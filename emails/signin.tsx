@@ -17,15 +17,16 @@ import {
 
 import Footer from './footer';
 import Footnote from './footnote';
+import { getAppBaseUrl, getAppName } from 'lib/config';
 
-const baseUrl = 'https://expense.fyi';
+const baseUrl = getAppBaseUrl();
 
 export const SignInEmail = ({ action_link = '' }: { action_link?: string }) => {
 	return (
 		<Html>
 			<Tailwind>
 				<Head />
-				<Preview>Sign in link to Expense.fyi</Preview>
+				<Preview>Sign in link to {getAppName()}</Preview>
 				<Body className="bg-white my-auto mx-auto font-sans">
 					<Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] w-[465px]">
 						<Section className="mt-[22px]">

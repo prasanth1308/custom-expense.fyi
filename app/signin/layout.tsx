@@ -1,4 +1,6 @@
-const title = 'Sign in to Expense.fyi';
+import { getAppName } from 'lib/config';
+
+const title = `Sign in to ${getAppName()}`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 export const metadata = {
