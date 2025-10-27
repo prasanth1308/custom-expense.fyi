@@ -21,6 +21,17 @@ export async function POST(request: NextRequest) {
 	const user = await prisma.users.findFirst({ where: { email }, select: { email: true } });
 	if (!user) {
 		try {
+			// First, create the user in Supabase Auth
+			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+				email,
+				email_confirm: false, // User will confirm via magic link
+			});
+
+			if (authError) {
+				throw authError;
+			}
+
+			// Then generate the magic link for the newly created user
 			const { data, error } = await supabaseAdmin.auth.admin.generateLink({
 				type: 'magiclink',
 				email,
