@@ -147,4 +147,5 @@ model contact {
   subject    String
   email      String
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  name       String?
 }
