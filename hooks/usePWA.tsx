@@ -42,8 +42,9 @@ export function usePWA() {
         console.log('App is online');
         // Sync any offline data
         navigator.serviceWorker.ready.then((registration) => {
-          if (registration.sync) {
-            registration.sync.register('background-sync');
+          // Check if background sync is supported
+          if ('sync' in registration) {
+            (registration as any).sync.register('background-sync');
           }
         });
       };

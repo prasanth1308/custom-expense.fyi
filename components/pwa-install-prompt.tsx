@@ -119,7 +119,7 @@ export default function PWAInstallPrompt() {
             Install Expense.fyi
           </DialogTitle>
           <DialogDescription>
-            Install this app on your device for a better experience. You'll get:
+            Install this app on your device for a better experience. You&apos;ll get:
           </DialogDescription>
         </DialogHeader>
         
