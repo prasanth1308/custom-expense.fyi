@@ -6,7 +6,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import './overwrites.css';
 import { getAppName, getAppTagline, getAppBaseUrl } from 'lib/config';
-import PWAProvider from 'components/pwa-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -50,7 +49,6 @@ export const viewport: Viewport = {
 	initialScale: 1,
 	userScalable: false,
 	themeColor: '#09090b',
-	viewportFit: 'cover',
 };
 
 export const revalidate = 0;
@@ -58,23 +56,7 @@ export const revalidate = 0;
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
-			<head>
-				<meta name="mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-				<meta name="apple-mobile-web-app-title" content={getAppName()} />
-				<meta name="application-name" content={getAppName()} />
-				<meta name="msapplication-TileColor" content="#09090b" />
-				<meta name="msapplication-tap-highlight" content="no" />
-				<link rel="apple-touch-icon" href="/icons/apple-icon.png" />
-				<link rel="mask-icon" href="/icons/icon.svg" color="#09090b" />
-			</head>
-			<body className={`${inter.className} flex h-full flex-col text-gray-600 antialiased`}>
-				<PWAProvider>
-					{children}
-				</PWAProvider>
-				<SpeedInsights />
-			</body>
+			<body className={`${inter.className} flex h-full flex-col text-gray-600 antialiased`}>{children}</body>
 			<Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`} strategy="afterInteractive" />
 			<Script id="ga4" strategy="afterInteractive">
 				{`
