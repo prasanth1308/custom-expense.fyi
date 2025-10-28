@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { getAppBaseUrl } from 'lib/config';
 
 export default function robots(): MetadataRoute.Robots {
 	return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
 			allow: '/',
 			disallow: '/private/',
 		},
-		sitemap: 'https://expense.fyi/sitemap.xml',
+		sitemap: `${getAppBaseUrl()}/sitemap.xml`,
 	};
 }

@@ -8,6 +8,7 @@ import Features from 'components/home/features';
 
 import url from 'constants/url';
 import { premiumPlan } from 'constants/usage';
+import { getAppName, getGithubUrl } from 'lib/config';
 
 export default function Home() {
 	return (
@@ -15,8 +16,8 @@ export default function Home() {
 			<header className="relative m-auto h-[56px] max-w-4xl pt-3">
 				<div className="absolute left-0 right-0 top-3 z-20 flex items-center justify-between">
 					<Link href={'/'} className="flex max-w-[180px] items-center p-3 text-2xl">
-						<Image src={logo} width={30} height={30} alt="expense.fyi logo" className="mr-2" />
-						<span className="font-black tracking-[-0.03em] text-gray-900">Expense.fyi</span>
+						<Image src={logo} width={30} height={30} alt={`${getAppName()} logo`} className="mr-2" />
+						<span className="font-black tracking-[-0.03em] text-gray-900">{getAppName()}</span>
 					</Link>
 					<Link
 						href={url.app.signin}
@@ -64,7 +65,7 @@ export default function Home() {
 							Try it for Free
 						</Link>
 						<Link
-							href={url.github}
+							href={getGithubUrl()}
 							className="ml-6 inline-flex h-[34px] items-center justify-center  rounded-full bg-white/0 px-4 py-2.5 text-sm font-medium text-slate-900 ring-1 ring-slate-900/10 hover:bg-gray-100 hover:shadow"
 						>
 							<svg
@@ -86,7 +87,7 @@ export default function Home() {
 						<span className="bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text text-transparent">
 							Why to use
 						</span>{' '}
-						Expense.fyi?
+						{getAppName()}?
 					</h2>
 					<ul className="mt-6 list-decimal px-4 text-left leading-6 [counter-reset:section] sm:px-2">
 						<li className="before::h-2 mt-4 text-base tracking-tight sm:text-lg">
@@ -339,7 +340,7 @@ export default function Home() {
 						Source code is available on GitHub - feel free to read, review, or contribute to it!
 					</p>
 					<Link
-						href={url.github}
+						href={getGithubUrl()}
 						className="mt-6 inline-flex h-[36px] items-center justify-center  rounded-full bg-white/0 px-4 py-2.5 text-sm font-medium text-slate-900 ring-1 ring-slate-900/10 hover:bg-gray-100 hover:shadow"
 					>
 						<svg

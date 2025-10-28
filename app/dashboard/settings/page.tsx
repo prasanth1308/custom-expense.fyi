@@ -1,4 +1,5 @@
 import LayoutHeader from 'components/layout/header';
+import { getAppName } from 'lib/config';
 
 import Account from './account';
 import DeleteAccount from './delete-account';
@@ -6,7 +7,7 @@ import Plans from './plans';
 import Theme from './theme';
 import Usage from './usage';
 
-const title = 'Expense.fyi – Settings';
+const title = `${getAppName()} – Settings`;
 const description = 'Effortlessly Track and Manage Expenses.';
 
 export const metadata = {

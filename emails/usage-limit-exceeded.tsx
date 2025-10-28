@@ -16,9 +16,10 @@ import {
 
 import Footer from './footer';
 import Footnote from './footnote';
+import { getAppBaseUrl } from 'lib/config';
 
-const baseUrl = 'https://expense.fyi';
-const settingUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://expense.fyi'}/settings`;
+const baseUrl = getAppBaseUrl();
+const settingUrl = `${getAppBaseUrl()}/settings`;
 
 type UsageProps = {
 	plan?: string;
