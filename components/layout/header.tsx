@@ -5,7 +5,7 @@ import { Button } from 'components/ui/button';
 import { Separator } from 'components/ui/separator';
 
 import DatePicker from '../datepicker';
-import Feedback from '../feedback';
+import { VaultSwitcher } from '../vault-switcher';
 
 const MenuIcon = () => (
 	<svg
@@ -33,7 +33,7 @@ export default function LayoutHeader({ title, showDatePicker = false }: { title:
 					showDatePicker ? 'flex-col sm:flex-row' : 'flex-row items-center'
 				}`}
 			>
-				<div className="flex">
+				<div className="flex items-center gap-4">
 					<Button className="mr-2 mt-[-1px] p-1 sm:hidden" onClick={() => setShow(!show)} variant={'ghost'}>
 						<MenuIcon />
 					</Button>
@@ -44,6 +44,7 @@ export default function LayoutHeader({ title, showDatePicker = false }: { title:
 					>
 						{title}
 					</h2>
+					<VaultSwitcher />
 				</div>
 				<div className="flex items-center justify-between sm:mt-0">
 					{showDatePicker ? (
@@ -52,10 +53,6 @@ export default function LayoutHeader({ title, showDatePicker = false }: { title:
 							<DatePicker />
 						</div>
 					) : null}
-					<Feedback
-						showDatePicker={showDatePicker}
-						className="absolute right-[16px] top-[12px] sm:relative sm:right-0 sm:top-0"
-					/>
 				</div>
 			</div>
 			<Separator />

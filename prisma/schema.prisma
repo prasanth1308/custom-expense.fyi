@@ -10,7 +10,36 @@ generator fieldEncryptionMigrations {
 datasource db {
   provider          = "postgresql"
   url               = env("SUPABASE_DB_URL")
+  directUrl         = env("DIRECT_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model vaults {
+  name          String
+  description   String?
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  owner_id      String          @db.Uuid
+  id            String          @id @default(uuid()) @db.Uuid
+  expenses      expenses[]
+  income        income[]
+  investments   investments[]
+  subscriptions subscriptions[]
+  vault_members vault_members[]
+  owner         users           @relation("VaultOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+}
+
+model vault_members {
+  vault_id   String   @db.Uuid
+  user_id    String   @db.Uuid
+  permission String   @default("read")
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  id         String   @id @default(uuid()) @db.Uuid
+  user       users    @relation("VaultMember", fields: [user_id], references: [id], onDelete: Cascade)
+  vault      vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+
+  @@unique([vault_id, user_id])
 }
 
 model subscriptions {
@@ -27,11 +56,11 @@ model subscriptions {
   date         String
   created_at   DateTime @default(now()) @db.Timestamptz(6)
   updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  user_id      String   @db.Uuid
   active       Boolean? @default(true)
   cancelled_at String?
   nameHash     String?
-  user         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vault_id     String   @db.Uuid
+  vault        vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
 }
 
 model expenses {
@@ -47,9 +76,9 @@ model expenses {
   date       String
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  user_id    String   @db.Uuid
   nameHash   String?
-  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vault_id   String   @db.Uuid
+  vault      vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
 }
 
 model income {
@@ -64,9 +93,9 @@ model income {
   date       String
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  user_id    String   @db.Uuid
   nameHash   String?
-  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vault_id   String   @db.Uuid
+  vault      vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
 }
 
 model investments {
@@ -83,9 +112,9 @@ model investments {
   date       String
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  user_id    String   @db.Uuid
   nameHash   String?
-  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vault_id   String   @db.Uuid
+  vault      vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
 }
 
 model users {
@@ -108,17 +137,8 @@ model users {
   premium_plan_expired_email Boolean         @default(false)
   premium_usage_limit_email  Boolean         @default(false)
   monthly_email_report       Boolean         @default(false)
-  expenses                   expenses[]
-  income                     income[]
-  investments                investments[]
-  subscriptions              subscriptions[]
-}
-
-model feedbacks {
-  id         Int      @id @default(autoincrement())
-  message    String
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  user_id    String   @db.Uuid
+  vault_members              vault_members[] @relation("VaultMember")
+  owned_vaults               vaults[]        @relation("VaultOwner")
 }
 
 model contact {

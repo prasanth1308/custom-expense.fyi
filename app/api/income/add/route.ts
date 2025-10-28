@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { checkAuth } from 'lib/auth';
+import { checkAuth, checkVaultPermission } from 'lib/auth';
 import prisma from 'lib/prisma';
 
 import messages from 'constants/messages';
 
 export async function POST(request: NextRequest) {
-	const { notes, name, price, category, date } = await request.json();
+	const { notes, name, price, category, date, vaultId } = await request.json();
 	return await checkAuth(async (user: any) => {
 		try {
+			// Check vault permission for write access
+			const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+			if (!hasPermission) {
+				return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+			}
+
 			await prisma.income.create({
-				data: { notes, name, price, category, user_id: user.id, date },
+				data: { notes, name, price, category, vault_id: vaultId, date },
 			});
 			return NextResponse.json('added', { status: 201 });
 		} catch (error) {

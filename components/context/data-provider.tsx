@@ -7,6 +7,8 @@ import useSWR from 'swr';
 import { views } from 'constants/table';
 import { getApiUrl } from 'constants/url';
 
+import { useVault } from './vault-provider';
+
 const DataContext = createContext(null);
 
 interface Data {
@@ -21,18 +23,21 @@ type Props = {
 
 export const DataContextProvider = (props: Props) => {
 	const { children, name, isNotRange = false } = props;
+	const { currentVault, isLoading: vaultLoading } = useVault();
 	const [filter, setFilter] = useState(views.thisMonth.key);
 	const [categories, setCategories] = useState<string[]>([]);
 
-	const { data = [], mutate, isLoading } = useSWR(getApiUrl(filter, name, categories, isNotRange));
+	const { data = [], mutate, isLoading } = useSWR(
+		currentVault && !vaultLoading ? getApiUrl(filter, name, categories, isNotRange, currentVault.id) : null
+	);
 
 	const onFilter = useCallback((categories: string[] = []) => {
 		setCategories(categories);
 	}, []);
 
 	const value = useMemo(
-		() => ({ data, loading: isLoading, filter: { name: filter, setFilter, onFilter }, mutate }),
-		[data, isLoading, filter, mutate, onFilter]
+		() => ({ data, loading: isLoading || vaultLoading, filter: { name: filter, setFilter, onFilter }, mutate }),
+		[data, isLoading, vaultLoading, filter, mutate, onFilter]
 	);
 
 	return <DataContext.Provider value={value as any}>{children}</DataContext.Provider>;

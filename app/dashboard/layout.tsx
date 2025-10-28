@@ -8,6 +8,7 @@ import NextTopLoader from 'nextjs-toploader';
 import { AuthProvider } from 'components/context/auth-provider';
 import { SidebarContextProvider } from 'components/context/sidebar-provider';
 import { ThemeProvider } from 'components/context/theme-provider';
+import { VaultProvider } from 'components/context/vault-provider';
 import DashboardLayout from 'components/layout';
 import Sidebar from 'components/sidebar';
 import { Toaster } from 'components/ui/sonner';
@@ -61,16 +62,18 @@ export default async function Layout({ children }: any) {
 					<NextTopLoader color="#0076ff" height={2} showSpinner={false} />
 					<AuthProvider user={user} accessToken={session?.access_token || null}>
 						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-							<main className="relative flex min-h-full min-w-full bg-background">
-								<DashboardLayout>
-									<SidebarContextProvider>
-										<Sidebar />
-										<div className="h-full w-full sm:ml-[64px]">
-											<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
-										</div>
-									</SidebarContextProvider>
-								</DashboardLayout>
-							</main>
+							<VaultProvider>
+								<main className="relative flex min-h-full min-w-full bg-background">
+									<DashboardLayout>
+										<SidebarContextProvider>
+											<Sidebar />
+											<div className="h-full w-full sm:ml-[64px]">
+												<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
+											</div>
+										</SidebarContextProvider>
+									</DashboardLayout>
+								</main>
+							</VaultProvider>
 						</ThemeProvider>
 						<Toaster closeButton position="top-right" theme="system" visibleToasts={3} richColors />
 					</AuthProvider>
