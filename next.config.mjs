@@ -7,10 +7,6 @@ const nextConfig = {
 	async headers() {
 		return [{ source: '/(.*)', headers: securityHeaders }];
 	},
-	// Enable compression
-	compress: true,
-	// Optimize for mobile
-	poweredByHeader: false,
 };
 
 const ContentSecurityPolicy = `
