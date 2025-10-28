@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
 				throw authError;
 			}
 
+			// Create user in database (vault will be created during signup flow)
+			await prisma.users.create({
+				data: {
+					id: authData.user.id,
+					email
+				}
+			});
+
 			// Then generate the magic link for the newly created user
 			const { data, error } = await supabaseAdmin.auth.admin.generateLink({
 				type: 'magiclink',

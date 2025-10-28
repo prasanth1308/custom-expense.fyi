@@ -7,10 +7,16 @@ export type InvestmentData = {
 	category: string;
 	units: number;
 	date: string;
+	id?: string | null;
+	vaultId?: string;
 };
 
 export const addInvestment = async (data: InvestmentData) => {
-	const res = await fetch(apiUrls.investments.add, { method: 'POST', body: JSON.stringify(data) });
+	const res = await fetch(apiUrls.investments.add, { 
+		method: 'POST', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data) 
+	});
 	if (!res.ok) {
 		const error = await res.json();
 		throw error;
@@ -18,12 +24,20 @@ export const addInvestment = async (data: InvestmentData) => {
 	return await res.json();
 };
 
-export const deleteInvestment = async (id: string) => {
-	const res = await fetch(apiUrls.investments.modify, { method: 'DELETE', body: JSON.stringify({ id: [id] }) });
+export const deleteInvestment = async (id: string, vaultId: string) => {
+	const res = await fetch(apiUrls.investments.modify, { 
+		method: 'DELETE', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ id: [id], vaultId }) 
+	});
 	return await res.json();
 };
 
 export const editInvestment = async (data: InvestmentData) => {
-	const res = await fetch(apiUrls.investments.modify, { method: 'PUT', body: JSON.stringify(data) });
+	const res = await fetch(apiUrls.investments.modify, { 
+		method: 'PUT', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data) 
+	});
 	return await res.json();
 };

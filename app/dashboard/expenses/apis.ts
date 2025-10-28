@@ -8,10 +8,15 @@ export type ExpenseData = {
 	date: string;
 	paid_via: string;
 	id: string | null;
+	vaultId?: string;
 };
 
 export const addExpense = async (data: ExpenseData) => {
-	const res = await fetch(apiUrls.expenses.add, { method: 'POST', body: JSON.stringify(data) });
+	const res = await fetch(apiUrls.expenses.add, { 
+		method: 'POST', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data) 
+	});
 	if (!res.ok) {
 		const error = await res.json();
 		throw error;
@@ -19,12 +24,20 @@ export const addExpense = async (data: ExpenseData) => {
 	return await res.json();
 };
 
-export const deleteExpense = async (id: string) => {
-	const res = await fetch(apiUrls.expenses.modify, { method: 'DELETE', body: JSON.stringify({ id: [id] }) });
+export const deleteExpense = async (id: string, vaultId: string) => {
+	const res = await fetch(apiUrls.expenses.modify, { 
+		method: 'DELETE', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ id: [id], vaultId }) 
+	});
 	return await res.json();
 };
 
 export const editExpense = async (data: ExpenseData) => {
-	const res = await fetch(apiUrls.expenses.modify, { method: 'PUT', body: JSON.stringify(data) });
+	const res = await fetch(apiUrls.expenses.modify, { 
+		method: 'PUT', 
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data) 
+	});
 	return await res.json();
 };

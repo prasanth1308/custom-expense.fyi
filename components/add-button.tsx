@@ -7,6 +7,8 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 
+import { useVault } from 'components/context/vault-provider';
+
 import shortcuts from 'constants/shortcuts';
 
 import AddExpense from './add/expenses';
@@ -32,13 +34,22 @@ const options = {
 
 export default function Add({ mutate, type, selected = {}, onHide, onLookup }: AddProps) {
 	const [show, setShow] = useState(false);
+	const { currentVault } = useVault();
 	useHotkeys(openShortcutKey, () => setShow(true), options);
+
+	// Check if user has write permission for current vault
+	const canWrite = currentVault?.permission === 'write' || currentVault?.is_owner;
 
 	useEffect(() => {
 		if (selected?.id) {
 			setShow(true);
 		}
 	}, [selected.id]);
+
+	// Don't show add button if user doesn't have write permission
+	if (!canWrite) {
+		return null;
+	}
 
 	return (
 		<>

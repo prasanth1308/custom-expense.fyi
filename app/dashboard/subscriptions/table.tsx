@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import Add from 'components/add-button';
 import { useUser } from 'components/context/auth-provider';
 import { useData } from 'components/context/data-provider';
+import { useVault } from 'components/context/vault-provider';
 import DataTable from 'components/table/data-table';
 
 import { sortByKey } from 'lib/extractor';
@@ -21,18 +22,23 @@ export default function SubscriptionsTable() {
 	const [selected, setSelected] = useState({});
 	const { data, loading, filter, mutate } = useData();
 	const user = useUser();
+	const { currentVault } = useVault();
 
 	const onDelete = useCallback(
 		async (id: string) => {
 			try {
-				await deleteSubscription(id);
+				if (!currentVault?.id) {
+					toast.error('Vault not selected');
+					return;
+				}
+				await deleteSubscription(id, currentVault.id);
 				toast.success(messages.deleted);
 				mutate();
 			} catch {
 				toast.error(messages.error);
 			}
 		},
-		[mutate]
+		[mutate, currentVault?.id]
 	);
 
 	const onChange = useCallback(

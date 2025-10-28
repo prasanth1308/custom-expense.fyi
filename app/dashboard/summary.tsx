@@ -35,14 +35,14 @@ export default function Summary() {
 	const user = useUser();
 	const { data, loading } = useOverview();
 
-	const totalExpenses = data.expenses.reduce((acc: any, { price }: any) => Number(price) + acc, 0);
-	const totalIncome = data.income.reduce((acc: any, { price }: any) => Number(price) + acc, 0);
-	const totalInvesments = data.investments.reduce(
+	const totalExpenses = (data.expenses || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0);
+	const totalIncome = (data.income || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0);
+	const totalInvesments = (data.investments || []).reduce(
 		(acc: any, { price, units }: any) => Number(price) * Number(units) + acc,
 		0
 	);
-	const totalSubscriptions = data.subscriptions.reduce(
-		(acc: any, { price, paid_dates }: any) => Number(price) * paid_dates.length + acc,
+	const totalSubscriptions = (data.subscriptions || []).reduce(
+		(acc: any, { price, paid_dates }: any) => Number(price) * (paid_dates?.length || 0) + acc,
 		0
 	);
 	const totalSpent = totalExpenses + totalInvesments + totalSubscriptions;

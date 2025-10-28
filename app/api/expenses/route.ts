@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { checkAuth } from 'lib/auth';
+import { checkAuth, checkVaultPermission } from 'lib/auth';
 import prisma from 'lib/prisma';
 
 import messages from 'constants/messages';
 
 type Where = {
-	user_id: string;
+	vault_id: string;
 	date?: {
 		lte: string;
 		gte: string;
@@ -21,12 +21,23 @@ export async function GET(request: NextRequest) {
 	const from = searchParams.get('from') || '';
 	const to = searchParams.get('to') || '';
 	const categories: any = searchParams.get('categories') || '';
+	const vaultId = searchParams.get('vaultId') || '';
 	const OR = { OR: categories?.split(',').map((category: any) => ({ category: { contains: category } })) };
 
 	return await checkAuth(async (user: any) => {
 		try {
+			// Check vault permission
+			if (!vaultId) {
+				return NextResponse.json({ message: 'Vault ID is required' }, { status: 400 });
+			}
+
+			const hasPermission = await checkVaultPermission(user.id, vaultId, 'read');
+			if (!hasPermission) {
+				return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+			}
+
 			const where = {
-				user_id: user.id,
+				vault_id: vaultId,
 				...(categories.length && OR),
 				...(to && from && { date: { lte: to, gte: from } }),
 			};
@@ -58,11 +69,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-	const { id } = await request.json();
+	const { id, vaultId } = await request.json();
 	return await checkAuth(async (user: any) => {
-		if (!id.length) {
+		if (!id.length || !vaultId) {
 			return NextResponse.json(messages.request.invalid, { status: 400 });
 		}
+
+		// Check vault permission for write access
+		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+		if (!hasPermission) {
+			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+		}
+
 		try {
 			await prisma.expenses.delete({
 				where: { id: id[0] },
@@ -75,12 +93,19 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-	const { notes, name, price, category, id, date, paid_via } = await request.json();
+	const { notes, name, price, category, id, date, paid_via, vaultId } = await request.json();
 
-	return await checkAuth(async () => {
-		if (!id) {
+	return await checkAuth(async (user: any) => {
+		if (!id || !vaultId) {
 			return NextResponse.json(messages.request.invalid, { status: 400 });
 		}
+
+		// Check vault permission for write access
+		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+		if (!hasPermission) {
+			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+		}
+
 		try {
 			await prisma.expenses.update({
 				data: { notes, name, price, date, paid_via, category },

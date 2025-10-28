@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import Add from 'components/add-button';
 import { useUser } from 'components/context/auth-provider';
 import { useData } from 'components/context/data-provider';
+import { useVault } from 'components/context/vault-provider';
 import DataTable from 'components/table/data-table';
 
 import { lookup } from 'lib/lookup';
@@ -28,18 +29,23 @@ export default function IncomeTable() {
 	const [selected, setSelected] = useState({});
 	const { data, loading, filter, mutate } = useData();
 	const user = useUser();
+	const { currentVault } = useVault();
 
 	const onDelete = useCallback(
 		async (id: string) => {
 			try {
-				await deleteIncome(id);
+				if (!currentVault?.id) {
+					toast.error('Vault not selected');
+					return;
+				}
+				await deleteIncome(id, currentVault.id);
 				toast.success(messages.deleted);
 				mutate();
 			} catch {
 				toast.error(messages.error);
 			}
 		},
-		[mutate]
+		[mutate, currentVault?.id]
 	);
 
 	const onEdit = useCallback(async (data: IncomeData | any) => {

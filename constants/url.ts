@@ -39,17 +39,26 @@ const url = {
 	github: getGithubUrl(),
 };
 
-export const getApiUrl = (filterKey: string, apiPath: string, categories: string[] = [], isNotRange = false) => {
+export const getApiUrl = (filterKey: string, apiPath: string, categories: string[] = [], isNotRange = false, vaultId?: string) => {
 	if (isNotRange) {
-		return `/api/${apiPath}`;
+		return vaultId ? `/api/${apiPath}?vaultId=${vaultId}` : `/api/${apiPath}`;
 	}
 
 	if (filterKey === views.all.key) {
-		return `/api/${apiPath}?categories=${categories?.join(',')}`;
+		const params = new URLSearchParams();
+		if (categories.length > 0) params.append('categories', categories.join(','));
+		if (vaultId) params.append('vaultId', vaultId);
+		const queryString = params.toString();
+		return `/api/${apiPath}${queryString ? `?${queryString}` : ''}`;
 	}
 
 	const [start, end] = getRangeDateForFilter(filterKey);
-	return `/api/${apiPath}?from=${start}&to=${end}&categories=${categories?.join(',')}`;
+	const params = new URLSearchParams();
+	params.append('from', start);
+	params.append('to', end);
+	if (categories.length > 0) params.append('categories', categories.join(','));
+	if (vaultId) params.append('vaultId', vaultId);
+	return `/api/${apiPath}?${params.toString()}`;
 };
 
 export default url;

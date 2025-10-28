@@ -80,8 +80,8 @@ async function migrateRecord(client: PrismaClient, cursor: Cursor | undefined) {
  *     }
  *   },
  *   "connections": {
- *     "user": {
- *       "modelName": "users",
+ *     "vault": {
+ *       "modelName": "vaults",
  *       "isList": false
  *     }
  *   }

@@ -13,7 +13,7 @@ import { apiUrls } from 'lib/apiUrls';
 
 import url from 'constants/url';
 
-const initialState = { loading: false, email: '', otp: '', success: false, error: '', step: 'email' };
+const initialState = { loading: false, email: '', otp: '', vaultName: '', success: false, error: '', step: 'email' };
 
 export default function Form() {
 	const [state, setState] = useState(initialState);
@@ -59,9 +59,33 @@ export default function Form() {
 			}
 
 			if (data.user) {
-				// Redirect to dashboard after successful signup
-				window.location.href = url.app.overview;
+				// Move to vault name step
+				setState((prev) => ({ ...prev, success: true, loading: false, step: 'vault' }));
 			}
+		} catch (error: any) {
+			setState((prev) => ({ ...prev, error: error.message, loading: false }));
+		}
+	};
+
+	const handleCreateVault = async () => {
+		setState((prev) => ({ ...prev, loading: true, error: '', success: false }));
+
+		try {
+			const response = await fetch('/api/vaults', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ 
+					name: state.vaultName,
+					description: 'Your personal expense tracking vault'
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to create vault');
+			}
+
+			// Redirect to dashboard after successful vault creation
+			window.location.href = url.app.overview;
 		} catch (error: any) {
 			setState((prev) => ({ ...prev, error: error.message, loading: false }));
 		}
@@ -94,8 +118,10 @@ export default function Form() {
 				event.preventDefault();
 				if (state.step === 'email') {
 					handleSendOTP();
-				} else {
+				} else if (state.step === 'otp') {
 					handleVerifyOTP();
+				} else if (state.step === 'vault') {
+					handleCreateVault();
 				}
 			}}
 		>
@@ -122,7 +148,7 @@ export default function Form() {
 						{state.loading ? <CircleLoader /> : 'Send verification code'}
 					</Button>
 				</>
-			) : (
+			) : state.step === 'otp' ? (
 				<>
 					<label className="mb-1 block">
 						<span className="mb-2 block text-sm font-semibold leading-6">Verification Code</span>
@@ -164,6 +190,39 @@ export default function Form() {
 						← Back to email
 					</Button>
 				</>
+			) : (
+				<>
+					<label className="mb-1 block">
+						<span className="mb-2 block text-sm font-semibold leading-6">Vault Name</span>
+						<input
+							className="mt-2 block h-10 w-full appearance-none rounded-md bg-white px-3 text-sm text-black shadow-sm ring-1 ring-gray-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-gray-900"
+							autoFocus
+							type="text"
+							placeholder="My Personal Vault"
+							required
+							value={state.vaultName}
+							onChange={(event) => {
+								setState({ ...state, vaultName: event.target.value });
+							}}
+							ref={inputElement}
+						/>
+					</label>
+					<p className="text-sm text-gray-600 mb-4">
+						Choose a name for your first vault. You can create up to 3 vaults and share them with others.
+					</p>
+					<Button size={'lg'} type="submit" disabled={state.loading}>
+						{state.loading ? <CircleLoader /> : 'Create Vault & Continue'}
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size={'sm'}
+						onClick={() => setState({ ...state, step: 'otp', error: '', success: false })}
+						className="w-full"
+					>
+						← Back to verification
+					</Button>
+				</>
 			)}
 
 			<p className="text-center text-sm font-medium text-zinc-700">
@@ -186,7 +245,9 @@ export default function Form() {
 					<span className="text-green-700">
 						{state.step === 'email' 
 							? 'Verification code sent to your email. Check your inbox.' 
-							: 'Account created successfully!'
+							: state.step === 'otp'
+							? 'Account verified! Now let\'s create your first vault.'
+							: 'Vault created successfully!'
 						}
 					</span>
 				) : null}

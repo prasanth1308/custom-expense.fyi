@@ -28,11 +28,6 @@ const messages = {
 
 export const emails = {
 	email: getContactEmail(),
-	feedback: {
-		subject: '🎉 New Feedback Received',
-		sent: 'Feedback received.',
-		failed: 'Failed to send, please try again.',
-	},
 	account: {
 		deleted: `Your ${getAppName()} account is Deleted!`,
 	},

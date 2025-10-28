@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 import AutoCompleteList from 'components/autocomplete-list';
 import { useUser } from 'components/context/auth-provider';
+import { useVault } from 'components/context/vault-provider';
 import CircleLoader from 'components/loader/circle';
 import Modal from 'components/modal';
 import { Button } from 'components/ui/button';
@@ -42,6 +43,7 @@ const initialState = {
 
 export default function AddInvestments({ show, onHide, mutate, selected, lookup }: AddInvestments) {
 	const user = useUser();
+	const { currentVault } = useVault();
 	const todayDate = format(new Date(), dateFormat);
 	const [state, setState] = useState<any>({ ...initialState, date: todayDate });
 	const [loading, setLoading] = useState(false);
@@ -64,10 +66,12 @@ export default function AddInvestments({ show, onHide, mutate, selected, lookup 
 		try {
 			setLoading(true);
 			const isEditing = selected?.id;
+			const investmentData = { ...state, vaultId: currentVault?.id };
+			
 			if (isEditing) {
-				await editInvestment(state);
+				await editInvestment(investmentData);
 			} else {
-				await addInvestment(state);
+				await addInvestment(investmentData);
 				incrementUsage();
 			}
 			setLoading(false);

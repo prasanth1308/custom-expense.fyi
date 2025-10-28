@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { format } from 'date-fns';
 
-import { checkAuth } from 'lib/auth';
+import { checkAuth, checkVaultPermission } from 'lib/auth';
 import { calculatePaidDates, calculatePrevRenewalDate, calculateRenewalDate } from 'lib/date';
 import prisma from 'lib/prisma';
 
@@ -13,11 +13,22 @@ export async function GET(request: NextRequest) {
 	const { searchParams } = request.nextUrl;
 	const from = searchParams.get('from') || '';
 	const to = searchParams.get('to') || '';
+	const vaultId = searchParams.get('vaultId') || '';
 
 	return await checkAuth(async (user: any) => {
 		try {
+			// Check vault permission
+			if (!vaultId) {
+				return NextResponse.json({ message: 'Vault ID is required' }, { status: 400 });
+			}
+
+			const hasPermission = await checkVaultPermission(user.id, vaultId, 'read');
+			if (!hasPermission) {
+				return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+			}
+
 			const data = await prisma.subscriptions.findMany({
-				where: { user_id: user.id },
+				where: { vault_id: vaultId },
 				orderBy: { date: 'desc' },
 			});
 
@@ -44,11 +55,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-	const { id } = await request.json();
+	const { id, vaultId } = await request.json();
 	return await checkAuth(async (user: any) => {
-		if (!id.length) {
+		if (!id.length || !vaultId) {
 			return NextResponse.json(messages.request.invalid, { status: 400 });
 		}
+
+		// Check vault permission for write access
+		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+		if (!hasPermission) {
+			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+		}
+
 		try {
 			await prisma.subscriptions.delete({
 				where: { id: id[0] },
@@ -61,12 +79,19 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-	const { notes, name, price, paid, id, url, date, active, cancelled_at } = await request.json();
+	const { notes, name, price, paid, id, url, date, active, cancelled_at, vaultId } = await request.json();
 
-	return await checkAuth(async () => {
-		if (!id) {
+	return await checkAuth(async (user: any) => {
+		if (!id || !vaultId) {
 			return NextResponse.json(messages.request.invalid, { status: 400 });
 		}
+
+		// Check vault permission for write access
+		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+		if (!hasPermission) {
+			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+		}
+
 		try {
 			await prisma.subscriptions.update({
 				data: { notes, name, price, date, url, paid, active, cancelled_at },

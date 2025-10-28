@@ -36,6 +36,50 @@ const getUserUsageLimit = (user: any) => {
 	return { isBasicUsageExceeded, isPremiumUsageExceeded, isPremiumPlanExpired };
 };
 
+// Helper function to check vault permissions
+export const checkVaultPermission = async (userId: string, vaultId: string, requiredPermission: 'read' | 'write' = 'read') => {
+	const vault = await prisma.vaults.findFirst({
+		where: {
+			id: vaultId,
+			OR: [
+				{ owner_id: userId },
+				{ vault_members: { some: { user_id: userId, permission: requiredPermission } } }
+			]
+		}
+	});
+
+	return !!vault;
+};
+
+// Helper function to get user's vault access
+export const getUserVaultAccess = async (userId: string, vaultId: string) => {
+	const vault = await prisma.vaults.findFirst({
+		where: {
+			id: vaultId,
+			OR: [
+				{ owner_id: userId },
+				{ vault_members: { some: { user_id: userId } } }
+			]
+		},
+		include: {
+			vault_members: {
+				where: { user_id: userId }
+			}
+		}
+	});
+
+	if (!vault) return null;
+
+	const isOwner = vault.owner_id === userId;
+	const permission = isOwner ? 'write' : (vault.vault_members[0]?.permission || 'read');
+
+	return {
+		vault,
+		permission,
+		isOwner
+	};
+};
+
 export const checkAuth = async (callback: Function, isGetMethod = true) => {
 	const supabase = createServerActionClient({ cookies });
 	const { data } = await supabase.auth.getSession();
