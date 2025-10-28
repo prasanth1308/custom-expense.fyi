@@ -7,6 +7,14 @@ const nextConfig = {
 	async headers() {
 		return [{ source: '/(.*)', headers: securityHeaders }];
 	},
+	// PWA optimizations
+	experimental: {
+		optimizeCss: true,
+	},
+	// Enable compression
+	compress: true,
+	// Optimize for mobile
+	poweredByHeader: false,
 };
 
 const ContentSecurityPolicy = `
