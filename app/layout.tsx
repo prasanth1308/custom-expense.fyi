@@ -1,6 +1,7 @@
 import { Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import './globals.css';
 import './overwrites.css';
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<PWAProvider>
 					{children}
 				</PWAProvider>
+				<SpeedInsights />
 			</body>
 			<Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`} strategy="afterInteractive" />
 			<Script id="ga4" strategy="afterInteractive">
