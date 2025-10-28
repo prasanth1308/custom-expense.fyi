@@ -341,14 +341,14 @@ export function VaultSwitcher({ className }: VaultSwitcherProps) {
               <div>
                 <p className="font-medium text-red-800">Are you sure you want to remove this member?</p>
                 <p className="text-sm text-red-600 mt-1">
-                  <strong>{memberToRemove?.email}</strong> will lose access to this vault and won't be able to view or edit any data.
+                  <strong>{memberToRemove?.email}</strong> will lose access to this vault and won&apos;t be able to view or edit any data.
                 </p>
               </div>
             </div>
             
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-sm text-gray-600">
-                <strong>This action cannot be undone.</strong> If you want to give them access again, you'll need to share the vault with them again.
+                <strong>This action cannot be undone.</strong> If you want to give them access again, you&apos;ll need to share the vault with them again.
               </p>
             </div>
             
