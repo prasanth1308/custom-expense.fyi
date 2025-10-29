@@ -19,21 +19,22 @@ jobs:
           echo "🔧 Installing PostgreSQL 17 client..."
           sudo apt-get update
           sudo apt-get install -y wget gnupg lsb-release
-          echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+            sudo gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | \
+            sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
 
-      - name: Dump and compress Supabase source database
+      - name: Dump Supabase source database with compression
         env:
           SRC_DB: ${{ secrets.SRC_DB }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d_%H-%M)
           BACKUP_FILE="supabase_backup_$DATE.dump"
-          COMPRESSED_FILE="${BACKUP_FILE}.gz"
 
-          echo "🟢 Starting pg_dump from source Supabase..."
+          echo "🟢 Starting pg_dump with native compression..."
           /usr/lib/postgresql/17/bin/pg_dump \
             --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
             --exclude-schema=auth \
@@ -42,30 +43,35 @@ jobs:
             --exclude-schema=storage \
             --exclude-schema=supabase_functions \
             --exclude-schema=supabase_migrations \
-            -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
+            -Fc -Z6 -v -d "$SRC_DB" -f "$BACKUP_FILE"
 
-          echo "🗜️ Compressing backup file..."
-          gzip "$BACKUP_FILE"
+          echo "✅ Compressed dump complete"
+          FILE_SIZE=$(stat -c%s "$BACKUP_FILE" 2>/dev/null || stat -f%z "$BACKUP_FILE")
+          echo "📦 Backup size: $((FILE_SIZE / 1024 / 1024)) MB"
+          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
 
-          echo "✅ Dump and compression complete"
-          echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
-
-      - name: Upload compressed backup as GitHub artifact
+      - name: Upload backup as GitHub artifact
         uses: actions/upload-artifact@v4
         with:
           name: supabase-db-backup
-          path: ${{ env.COMPRESSED_FILE }}
+          path: ${{ env.BACKUP_FILE }}
           retention-days: 7
 
-      - name: Restore compressed backup into destination Supabase
-        if: success() # only run if backup/upload succeeded
+      - name: Restore backup into destination Supabase
+        if: success()
         env:
           DEST_DB: ${{ secrets.DEST_DB }}
         run: |
           set -e
           echo "🟢 Restoring backup into destination Supabase..."
-          gunzip -c "${{ env.COMPRESSED_FILE }}" | /usr/lib/postgresql/17/bin/pg_restore \
-            --no-owner --no-privileges --no-comments --exit-on-error \
-            -v -d "$DEST_DB" || true
-
+          /usr/lib/postgresql/17/bin/pg_restore \
+            --no-owner --no-privileges --no-comments \
+            -v -d "$DEST_DB" "${{ env.BACKUP_FILE }}"
+          
           echo "✅ Restore process completed"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Backup or restore process failed!"
+          echo "Check the logs above for details."
