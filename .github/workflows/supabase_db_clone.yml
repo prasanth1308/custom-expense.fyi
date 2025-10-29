@@ -43,6 +43,8 @@ jobs:
             --exclude-schema=storage \
             --exclude-schema=supabase_functions \
             --exclude-schema=supabase_migrations \
+            --exclude-schema=realtime \
+            --exclude-schema=_realtime \
             -Fc -Z6 -v -d "$SRC_DB" -f "$BACKUP_FILE"
 
           echo "✅ Compressed dump complete"
@@ -62,13 +64,34 @@ jobs:
         env:
           DEST_DB: ${{ secrets.DEST_DB }}
         run: |
-          set -e
+          set +e  # Handle errors manually
           echo "🟢 Restoring backup into destination Supabase..."
+          
           /usr/lib/postgresql/17/bin/pg_restore \
             --no-owner --no-privileges --no-comments \
-            -v -d "$DEST_DB" "${{ env.BACKUP_FILE }}"
+            -v -d "$DEST_DB" "${{ env.BACKUP_FILE }}" 2>&1 | tee restore.log
           
-          echo "✅ Restore process completed"
+          RESTORE_EXIT_CODE=${PIPESTATUS[0]}
+          
+          # Filter out expected Supabase system errors
+          CRITICAL_ERRORS=$(grep -i "error:" restore.log | \
+            grep -v "event trigger" | \
+            grep -v "pgrst_ddl_watch" | \
+            grep -v "pgrst_drop_watch" | \
+            grep -v "issue_graphql_placeholder" | \
+            grep -v "grant_pg_net_access" | \
+            grep -v "already exists" || true)
+          
+          if [ -n "$CRITICAL_ERRORS" ]; then
+            echo "❌ Critical errors found during restore:"
+            echo "$CRITICAL_ERRORS"
+            exit 1
+          fi
+          
+          TOTAL_ERRORS=$(grep -c "error:" restore.log || echo "0")
+          WARNINGS=$(grep -c "warning:" restore.log || echo "0")
+          echo "✅ Restore completed successfully"
+          echo "📊 Summary: $TOTAL_ERRORS expected errors filtered, $WARNINGS warnings"
 
       - name: Notify on failure
         if: failure()
