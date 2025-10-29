@@ -1,26 +1,17 @@
-name: Daily Supabase DB Clone + Compressed Backup
+name: Supabase Backup and Restore
 
 on:
   schedule:
-    # Runs daily at 2 AM IST (20:30 UTC)
-    - cron: "30 20 * * *"
-  workflow_dispatch:
+    # Runs every day at 11:30 PM IST (which is 18:00 UTC)
+    - cron: '0 18 * * *'
+  workflow_dispatch:  # allows manual trigger from Actions tab
 
 jobs:
-  clone-and-backup:
+  backup-and-restore:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install PostgreSQL 17 client
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
-          /usr/lib/postgresql/17/bin/pg_dump --version
 
       - name: Dump, compress, and restore Supabase databases
         env:
@@ -30,15 +21,28 @@ jobs:
           set -e
           DATE=$(date +%Y-%m-%d_%H-%M)
           BACKUP_FILE="supabase_backup_$DATE.dump"
-          COMPRESSED_FILE="$BACKUP_FILE.gz"
+          COMPRESSED_FILE="${BACKUP_FILE}.gz"
 
           echo "🟢 Starting pg_dump from source Supabase..."
           /usr/lib/postgresql/17/bin/pg_dump \
             --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
+            --exclude-schema=auth \
+            --exclude-schema=storage \
+            --exclude-schema=extensions \
+            --exclude-schema=supabase_functions \
+            --exclude-schema=pgbouncer \
             -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
+
+          if [ ! -s "$BACKUP_FILE" ]; then
+            echo "❌ Backup file is empty or missing!"
+            exit 1
+          fi
 
           echo "🗜️ Compressing backup file..."
           gzip "$BACKUP_FILE"
+
+          echo "🧾 Verifying compressed file..."
+          ls -lh "$COMPRESSED_FILE"
 
           echo "🟢 Restoring compressed backup into destination Supabase..."
           gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
