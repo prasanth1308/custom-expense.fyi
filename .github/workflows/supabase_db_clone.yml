@@ -1,4 +1,4 @@
-name: Daily Supabase DB Clone + Backup
+name: Daily Supabase DB Clone + Compressed Backup
 
 on:
   schedule:
@@ -14,12 +14,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL client
+      - name: Install PostgreSQL 17 client
         run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client-17
+          /usr/lib/postgresql/17/bin/pg_dump --version
 
-      - name: Dump and restore Supabase databases
+      - name: Dump, compress, and restore Supabase databases
         env:
           SRC_DB: ${{ secrets.SRC_DB }}
           DEST_DB: ${{ secrets.DEST_DB }}
@@ -27,21 +30,25 @@ jobs:
           set -e
           DATE=$(date +%Y-%m-%d_%H-%M)
           BACKUP_FILE="supabase_backup_$DATE.dump"
+          COMPRESSED_FILE="$BACKUP_FILE.gz"
 
           echo "🟢 Starting pg_dump from source Supabase..."
-          pg_dump --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
+          /usr/lib/postgresql/17/bin/pg_dump \
+            --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
+            -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
 
-          echo "🟢 Restoring into destination Supabase..."
-          pg_restore -v -d "$DEST_DB" "$BACKUP_FILE"
+          echo "🗜️ Compressing backup file..."
+          gzip "$BACKUP_FILE"
 
-          echo "✅ Backup and restore completed successfully on $DATE"
+          echo "🟢 Restoring compressed backup into destination Supabase..."
+          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
 
-          # Save filename for artifact upload
-          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+          echo "✅ Backup, compression, and restore completed successfully on $DATE"
+          echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
 
-      - name: Upload backup as GitHub artifact
+      - name: Upload compressed backup as GitHub artifact
         uses: actions/upload-artifact@v4
         with:
           name: supabase-db-backup
-          path: ${{ env.BACKUP_FILE }}
-          retention-days: 7  # keep for 7 days
+          path: ${{ env.COMPRESSED_FILE }}
+          retention-days: 7
