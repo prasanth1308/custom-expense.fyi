@@ -73,16 +73,20 @@ jobs:
             echo "🟢 Restoring from $COMPRESSED_FILE..."
             gunzip -c "$COMPRESSED_FILE" > "$BACKUP_FILE"
 
+            # Create a list file excluding event triggers
+            /usr/lib/postgresql/17/bin/pg_restore -l "$BACKUP_FILE" | \
+              grep -v "EVENT TRIGGER" > restore.list
+
             /usr/lib/postgresql/17/bin/pg_restore \
             --no-owner \
             --no-privileges \
             --no-comments \
-            --no-event-triggers \
             --exclude-schema=extensions \
             --exclude-schema=pgbouncer \
             --exclude-schema=auth \
             --exclude-schema=storage \
             --exclude-schema=supabase_functions \
+            --use-list=restore.list \
             -v -d "$DEST_DB" "$BACKUP_FILE"
 
-            echo "✅ Restore completed successfully (event triggers skipped)."
+            echo "✅ Restore completed successfully (event triggers excluded)."
