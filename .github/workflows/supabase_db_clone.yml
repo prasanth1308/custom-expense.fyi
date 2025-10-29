@@ -77,6 +77,7 @@ jobs:
             --no-owner \
             --no-privileges \
             --no-comments \
+            --no-event-triggers \
             --exclude-schema=extensions \
             --exclude-schema=pgbouncer \
             --exclude-schema=auth \
@@ -84,4 +85,4 @@ jobs:
             --exclude-schema=supabase_functions \
             -v -d "$DEST_DB" "$BACKUP_FILE"
 
-            echo "✅ Restore completed successfully (internal Supabase triggers skipped)."
+            echo "✅ Restore completed successfully (event triggers skipped)."
