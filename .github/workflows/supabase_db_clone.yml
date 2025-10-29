@@ -14,10 +14,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL client (pg_dump & pg_restore)
+      - name: Install PostgreSQL 17 client tools
         run: |
+          echo "🔧 Installing PostgreSQL 17 client..."
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y wget gnupg lsb-release
+          echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
 
       - name: Dump, compress, and restore Supabase databases
         env:
@@ -30,7 +35,7 @@ jobs:
           COMPRESSED_FILE="${BACKUP_FILE}.gz"
 
           echo "🟢 Starting pg_dump from source Supabase..."
-          pg_dump \
+          /usr/lib/postgresql/17/bin/pg_dump \
             --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
             --exclude-schema=auth \
             --exclude-schema=storage \
@@ -51,7 +56,7 @@ jobs:
           ls -lh "$COMPRESSED_FILE"
 
           echo "🟢 Restoring compressed backup into destination Supabase..."
-          gunzip -c "$COMPRESSED_FILE" | pg_restore -v -d "$DEST_DB"
+          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
 
           echo "✅ Backup, compression, and restore completed successfully on $DATE"
           echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
