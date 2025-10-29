@@ -126,7 +126,7 @@ export default function Form() {
 						{state.loading ? <CircleLoader /> : 'Send verification code'}
 					</Button>
 				</>
-			) : state.step === 'otp' ? (
+			) : (
 				<>
 					<label className="mb-1 block">
 						<span className="mb-2 block text-sm font-semibold leading-6">Verification Code</span>
