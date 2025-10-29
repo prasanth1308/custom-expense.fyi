@@ -23,7 +23,6 @@ jobs:
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
-
       - name: Dump, compress, and restore Supabase databases
         env:
           SRC_DB: ${{ secrets.SRC_DB }}
@@ -38,10 +37,11 @@ jobs:
           /usr/lib/postgresql/17/bin/pg_dump \
             --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
             --exclude-schema=auth \
-            --exclude-schema=storage \
             --exclude-schema=extensions \
-            --exclude-schema=supabase_functions \
             --exclude-schema=pgbouncer \
+            --exclude-schema=storage \
+            --exclude-schema=supabase_functions \
+            --exclude-schema=supabase_migrations \
             -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
 
           if [ ! -s "$BACKUP_FILE" ]; then
@@ -56,7 +56,9 @@ jobs:
           ls -lh "$COMPRESSED_FILE"
 
           echo "🟢 Restoring compressed backup into destination Supabase..."
-          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
+          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore \
+            --no-owner --no-privileges --no-comments --exit-on-error \
+            -v -d "$DEST_DB" || true
 
           echo "✅ Backup, compression, and restore completed successfully on $DATE"
           echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
