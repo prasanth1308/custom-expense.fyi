@@ -2,16 +2,22 @@ name: Supabase Backup and Restore
 
 on:
   schedule:
-    # Runs every day at 11:30 PM IST (which is 18:00 UTC)
-    - cron: '0 18 * * *'
-  workflow_dispatch:  # allows manual trigger from Actions tab
+    # Runs every day at 2:00 AM IST (20:30 UTC)
+    - cron: '30 20 * * *'
+  workflow_dispatch: # manual trigger support
 
 jobs:
   backup-and-restore:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client (pg_dump & pg_restore)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
       - name: Dump, compress, and restore Supabase databases
         env:
@@ -24,7 +30,7 @@ jobs:
           COMPRESSED_FILE="${BACKUP_FILE}.gz"
 
           echo "🟢 Starting pg_dump from source Supabase..."
-          /usr/lib/postgresql/17/bin/pg_dump \
+          pg_dump \
             --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
             --exclude-schema=auth \
             --exclude-schema=storage \
@@ -45,7 +51,7 @@ jobs:
           ls -lh "$COMPRESSED_FILE"
 
           echo "🟢 Restoring compressed backup into destination Supabase..."
-          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
+          gunzip -c "$COMPRESSED_FILE" | pg_restore -v -d "$DEST_DB"
 
           echo "✅ Backup, compression, and restore completed successfully on $DATE"
           echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
