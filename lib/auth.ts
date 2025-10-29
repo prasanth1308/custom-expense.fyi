@@ -51,6 +51,27 @@ export const checkVaultPermission = async (userId: string, vaultId: string, requ
 	return !!vault;
 };
 
+// Helper function to ensure user exists in database
+export const ensureUserExists = async (userId: string, email: string) => {
+	try {
+		let user = await prisma.users.findUnique({ where: { id: userId } });
+		
+		if (!user) {
+			user = await prisma.users.create({
+				data: {
+					id: userId,
+					email: email
+				}
+			});
+		}
+		
+		return user;
+	} catch (error) {
+		console.error('Failed to ensure user exists:', error);
+		throw error;
+	}
+};
+
 // Helper function to get user's vault access
 export const getUserVaultAccess = async (userId: string, vaultId: string) => {
 	const vault = await prisma.vaults.findFirst({
@@ -86,61 +107,67 @@ export const checkAuth = async (callback: Function, isGetMethod = true) => {
 	const { session } = data;
 
 	if (session && session.user) {
-		const user = await prisma.users.findUnique({ where: { id: session.user.id } });
-		const { basic_usage_limit_email, premium_usage_limit_email, premium_plan_expired_email } = user as UserData;
-		const { isBasicUsageExceeded, isPremiumUsageExceeded, isPremiumPlanExpired } = getUserUsageLimit(user);
+		try {
+			const user = await ensureUserExists(session.user.id, session.user.email || '');
+			
+			const { basic_usage_limit_email, premium_usage_limit_email, premium_plan_expired_email } = user as UserData;
+			const { isBasicUsageExceeded, isPremiumUsageExceeded, isPremiumPlanExpired } = getUserUsageLimit(user);
 
-		if (isBasicUsageExceeded && !isGetMethod && user) {
-			if (!basic_usage_limit_email) {
-				try {
-					await resend.emails.send({
-						from: emails.from,
-						subject: emails.usageLimit.basic.subject,
-						to: user.email,
-						react: UsageExceededEmail({ maxUsageLimit: basicPlan.limit }),
-					});
-					await prisma.users.update({ where: { id: user?.id }, data: { basic_usage_limit_email: true } });
-				} catch (error) {
-					return NextResponse.json({ message: messages.serverError }, { status: 401 });
+			if (isBasicUsageExceeded && !isGetMethod && user) {
+				if (!basic_usage_limit_email) {
+					try {
+						await resend.emails.send({
+							from: emails.from,
+							subject: emails.usageLimit.basic.subject,
+							to: user.email,
+							react: UsageExceededEmail({ maxUsageLimit: basicPlan.limit }),
+						});
+						await prisma.users.update({ where: { id: user?.id }, data: { basic_usage_limit_email: true } });
+					} catch (error) {
+						return NextResponse.json({ message: messages.serverError }, { status: 401 });
+					}
 				}
+				return NextResponse.json({ message: emails.usageLimit.basic.message }, { status: 403 });
 			}
-			return NextResponse.json({ message: emails.usageLimit.basic.message }, { status: 403 });
-		}
 
-		if (isPremiumPlanExpired && !isGetMethod && user) {
-			if (!premium_plan_expired_email) {
-				try {
-					await resend.emails.send({
-						from: emails.from,
-						subject: emails.usageLimit.premiumExpired.subject,
-						to: user.email,
-						react: PlanExpiredEmail({ plan: 'Premium Plan' }),
-					});
-					await prisma.users.update({ where: { id: user?.id }, data: { premium_plan_expired_email: true } });
-				} catch (error) {
-					return NextResponse.json({ message: messages.serverError }, { status: 401 });
+			if (isPremiumPlanExpired && !isGetMethod && user) {
+				if (!premium_plan_expired_email) {
+					try {
+						await resend.emails.send({
+							from: emails.from,
+							subject: emails.usageLimit.premiumExpired.subject,
+							to: user.email,
+							react: PlanExpiredEmail({ plan: 'Premium Plan' }),
+						});
+						await prisma.users.update({ where: { id: user?.id }, data: { premium_plan_expired_email: true } });
+					} catch (error) {
+						return NextResponse.json({ message: messages.serverError }, { status: 401 });
+					}
 				}
+				return NextResponse.json({ message: emails.usageLimit.premiumExpired.message }, { status: 403 });
 			}
-			return NextResponse.json({ message: emails.usageLimit.premiumExpired.message }, { status: 403 });
-		}
 
-		if (isPremiumUsageExceeded && !isGetMethod && user) {
-			if (!premium_usage_limit_email) {
-				try {
-					await resend.emails.send({
-						from: emails.from,
-						subject: emails.usageLimit.premium.subject,
-						to: user.email,
-						react: UsageExceededEmail({ maxUsageLimit: premiumPlan.limit, plan: 'Premium Plan' }),
-					});
-					await prisma.users.update({ where: { id: user?.id }, data: { premium_usage_limit_email: true } });
-				} catch (error) {
-					return NextResponse.json({ message: messages.serverError }, { status: 401 });
+			if (isPremiumUsageExceeded && !isGetMethod && user) {
+				if (!premium_usage_limit_email) {
+					try {
+						await resend.emails.send({
+							from: emails.from,
+							subject: emails.usageLimit.premium.subject,
+							to: user.email,
+							react: UsageExceededEmail({ maxUsageLimit: premiumPlan.limit, plan: 'Premium Plan' }),
+						});
+						await prisma.users.update({ where: { id: user?.id }, data: { premium_usage_limit_email: true } });
+					} catch (error) {
+						return NextResponse.json({ message: messages.serverError }, { status: 401 });
+					}
 				}
+				return NextResponse.json({ message: emails.usageLimit.premium.message }, { status: 403 });
 			}
-			return NextResponse.json({ message: emails.usageLimit.premium.message }, { status: 403 });
+			return callback(session.user);
+		} catch (error) {
+			console.error('Failed to process user authentication:', error);
+			return NextResponse.json({ message: 'Failed to process user authentication' }, { status: 500 });
 		}
-		return callback(session.user);
 	} else {
 		return NextResponse.json({ message: messages.account.unauthorized }, { status: 401 });
 	}

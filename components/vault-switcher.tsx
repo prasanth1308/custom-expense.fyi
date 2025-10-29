@@ -19,7 +19,7 @@ interface VaultSwitcherProps {
 }
 
 export function VaultSwitcher({ className }: VaultSwitcherProps) {
-  const { currentVault, vaults, switchVault, createVault, shareVault, removeVaultMember } = useVault();
+  const { currentVault, vaults, hasNoVaults, switchVault, createVault, shareVault, removeVaultMember } = useVault();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -90,6 +90,11 @@ export function VaultSwitcher({ className }: VaultSwitcherProps) {
         <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
       </div>
     );
+  }
+
+  // Don't render if there are no vaults
+  if (hasNoVaults) {
+    return null;
   }
 
   return (

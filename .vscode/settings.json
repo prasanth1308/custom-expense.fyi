@@ -1,0 +1,11 @@
+{
+    "cursor.autoExecuteCommands": false,
+    "cursor.terminalCommands": {
+        "prisma": "disabled"
+    },
+    "cursor.terminalCommandFilter": [
+        "prisma",
+        "npx prisma",
+        "yarn prisma"
+    ]
+}

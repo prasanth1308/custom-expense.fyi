@@ -21,6 +21,7 @@ interface VaultContextType {
   currentVault: Vault | null;
   vaults: Vault[];
   isLoading: boolean;
+  hasNoVaults: boolean;
   switchVault: (vaultId: string) => void;
   refreshVaults: () => Promise<void>;
   createVault: (name: string, description?: string) => Promise<void>;
@@ -35,6 +36,8 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const hasNoVaults = !isLoading && vaults.length === 0;
 
   const fetchVaults = async () => {
     try {
@@ -138,6 +141,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         currentVault,
         vaults,
         isLoading,
+        hasNoVaults,
         switchVault,
         refreshVaults,
         createVault,
