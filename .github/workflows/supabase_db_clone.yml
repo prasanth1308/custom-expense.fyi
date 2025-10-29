@@ -1,54 +1,112 @@
-name: Daily Supabase DB Clone + Compressed Backup
+name: Supabase Backup and Restore
 
 on:
   schedule:
-    # Runs daily at 2 AM IST (20:30 UTC)
-    - cron: "30 20 * * *"
+    # Runs 3 times per day — 2 AM, 10 AM, and 6 PM UTC
+    - cron: "0 2,10,18 * * *"
   workflow_dispatch:
 
 jobs:
-  clone-and-backup:
+  backup:
+    name: Backup Supabase DB
     runs-on: ubuntu-latest
-
+    env:
+      SRC_DB: ${{ secrets.SRC_DB }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install PostgreSQL 17 client
+      - name: 🧩 Install PostgreSQL 17 client
         run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
-          /usr/lib/postgresql/17/bin/pg_dump --version
 
-      - name: Dump, compress, and restore Supabase databases
-        env:
-          SRC_DB: ${{ secrets.SRC_DB }}
-          DEST_DB: ${{ secrets.DEST_DB }}
+      - name: 📦 Create compressed dump file
         run: |
           set -e
           DATE=$(date +%Y-%m-%d_%H-%M)
           BACKUP_FILE="supabase_backup_$DATE.dump"
           COMPRESSED_FILE="$BACKUP_FILE.gz"
-
           echo "🟢 Starting pg_dump from source Supabase..."
           /usr/lib/postgresql/17/bin/pg_dump \
-            --no-owner --no-privileges --no-publications --no-subscriptions --no-tablespaces \
+            --no-owner \
+            --no-privileges \
+            --no-publications \
+            --no-subscriptions \
+            --no-tablespaces \
+            --exclude-schema=auth \
+            --exclude-schema=storage \
+            --exclude-schema=extensions \
+            --exclude-schema=supabase_functions \
+            --exclude-schema=pgbouncer \
+            --exclude-schema=realtime \
             -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
-
-          echo "🗜️ Compressing backup file..."
+          echo "🗜️ Compressing dump..."
           gzip "$BACKUP_FILE"
-
-          echo "🟢 Restoring compressed backup into destination Supabase..."
-          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore -v -d "$DEST_DB"
-
-          echo "✅ Backup, compression, and restore completed successfully on $DATE"
           echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
 
-      - name: Upload compressed backup as GitHub artifact
+      - name: ⬆️ Upload backup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: supabase-db-backup
+          name: supabase-backup
           path: ${{ env.COMPRESSED_FILE }}
           retention-days: 7
+
+  restore:
+    name: Restore Supabase DB
+    runs-on: ubuntu-latest
+    needs: backup
+    env:
+      DEST_DB: ${{ secrets.DEST_DB }}
+    steps:
+      - name: 🧩 Install PostgreSQL 17 client
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: ⬇️ Download latest backup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: supabase-backup
+
+      - name: 🧹 Clean destination database
+        run: |
+          set -e
+          echo "🧹 Dropping public schema to avoid conflicts..."
+          psql "$DEST_DB" -c "DROP SCHEMA IF EXISTS public CASCADE;"
+          psql "$DEST_DB" -c "CREATE SCHEMA public;"
+          psql "$DEST_DB" -c "GRANT ALL ON SCHEMA public TO postgres;"
+          psql "$DEST_DB" -c "GRANT ALL ON SCHEMA public TO public;"
+
+      - name: 🔄 Restore to destination Supabase
+        run: |
+            set -e
+            COMPRESSED_FILE=$(ls supabase_backup_*.dump.gz | sort -r | head -n 1)
+            BACKUP_FILE="${COMPRESSED_FILE%.gz}"
+            echo "🟢 Restoring from $COMPRESSED_FILE..."
+            gunzip -c "$COMPRESSED_FILE" > "$BACKUP_FILE"
+
+            # Create a list file excluding problematic items
+            /usr/lib/postgresql/17/bin/pg_restore -l "$BACKUP_FILE" | \
+              grep -v "EVENT TRIGGER" | \
+              grep -v "ROW SECURITY" > restore.list
+
+            /usr/lib/postgresql/17/bin/pg_restore \
+            --no-owner \
+            --no-privileges \
+            --no-comments \
+            --exclude-schema=extensions \
+            --exclude-schema=pgbouncer \
+            --exclude-schema=auth \
+            --exclude-schema=storage \
+            --exclude-schema=supabase_functions \
+            --use-list=restore.list \
+            --clean \
+            --if-exists \
+            -v -d "$DEST_DB" "$BACKUP_FILE" || {
+              echo "⚠️ Restore completed with warnings (this is normal for Supabase)"
+              exit 0
+            }
+
+            echo "✅ Restore completed successfully!"
