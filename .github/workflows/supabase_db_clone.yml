@@ -2,9 +2,9 @@ name: Supabase Backup and Restore
 
 on:
   schedule:
-    # Runs every day at 2:00 AM IST (20:30 UTC)
+    # Runs daily at 2:00 AM IST (20:30 UTC)
     - cron: '30 20 * * *'
-  workflow_dispatch: # manual trigger support
+  workflow_dispatch:
 
 jobs:
   backup-and-restore:
@@ -23,10 +23,10 @@ jobs:
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
-      - name: Dump, compress, and restore Supabase databases
+
+      - name: Dump and compress Supabase source database
         env:
           SRC_DB: ${{ secrets.SRC_DB }}
-          DEST_DB: ${{ secrets.DEST_DB }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d_%H-%M)
@@ -44,23 +44,10 @@ jobs:
             --exclude-schema=supabase_migrations \
             -Fc -v -d "$SRC_DB" -f "$BACKUP_FILE"
 
-          if [ ! -s "$BACKUP_FILE" ]; then
-            echo "❌ Backup file is empty or missing!"
-            exit 1
-          fi
-
           echo "🗜️ Compressing backup file..."
           gzip "$BACKUP_FILE"
 
-          echo "🧾 Verifying compressed file..."
-          ls -lh "$COMPRESSED_FILE"
-
-          echo "🟢 Restoring compressed backup into destination Supabase..."
-          gunzip -c "$COMPRESSED_FILE" | /usr/lib/postgresql/17/bin/pg_restore \
-            --no-owner --no-privileges --no-comments --exit-on-error \
-            -v -d "$DEST_DB" || true
-
-          echo "✅ Backup, compression, and restore completed successfully on $DATE"
+          echo "✅ Dump and compression complete"
           echo "COMPRESSED_FILE=$COMPRESSED_FILE" >> $GITHUB_ENV
 
       - name: Upload compressed backup as GitHub artifact
@@ -69,3 +56,16 @@ jobs:
           name: supabase-db-backup
           path: ${{ env.COMPRESSED_FILE }}
           retention-days: 7
+
+      - name: Restore compressed backup into destination Supabase
+        if: success() # only run if backup/upload succeeded
+        env:
+          DEST_DB: ${{ secrets.DEST_DB }}
+        run: |
+          set -e
+          echo "🟢 Restoring backup into destination Supabase..."
+          gunzip -c "${{ env.COMPRESSED_FILE }}" | /usr/lib/postgresql/17/bin/pg_restore \
+            --no-owner --no-privileges --no-comments --exit-on-error \
+            -v -d "$DEST_DB" || true
+
+          echo "✅ Restore process completed"
