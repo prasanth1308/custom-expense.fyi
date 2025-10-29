@@ -11,6 +11,7 @@ import { ThemeProvider } from 'components/context/theme-provider';
 import { VaultProvider } from 'components/context/vault-provider';
 import DashboardLayout from 'components/layout';
 import Sidebar from 'components/sidebar';
+import { VaultGate } from 'components/vault-gate';
 import { Toaster } from 'components/ui/sonner';
 
 import { apiUrls } from 'lib/apiUrls';
@@ -39,13 +40,18 @@ export const metadata = {
 export const revalidate = 0;
 
 async function getUser(cookies: any) {
-	const res = await fetch(`${url.serverApi}/${apiUrls.user.modify}`, {
-		headers: { cookie: cookies },
-	});
-	if (!res.ok) {
+	try {
+		const res = await fetch(`${url.serverApi}/${apiUrls.user.modify}`, {
+			headers: { cookie: cookies },
+		});
+		if (!res.ok) {
+			return {};
+		}
+		return await res.json();
+	} catch (error) {
+		console.error('Failed to fetch user data:', error);
 		return {};
 	}
-	return await res.json();
 }
 
 export default async function Layout({ children }: any) {
@@ -63,16 +69,18 @@ export default async function Layout({ children }: any) {
 					<AuthProvider user={user} accessToken={session?.access_token || null}>
 						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 							<VaultProvider>
-								<main className="relative flex min-h-full min-w-full bg-background">
-									<DashboardLayout>
-										<SidebarContextProvider>
-											<Sidebar />
-											<div className="h-full w-full sm:ml-[64px]">
-												<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
-											</div>
-										</SidebarContextProvider>
-									</DashboardLayout>
-								</main>
+								<VaultGate>
+									<main className="relative flex min-h-full min-w-full bg-background">
+										<DashboardLayout>
+											<SidebarContextProvider>
+												<Sidebar />
+												<div className="h-full w-full sm:ml-[64px]">
+													<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
+												</div>
+											</SidebarContextProvider>
+										</DashboardLayout>
+									</main>
+								</VaultGate>
 							</VaultProvider>
 						</ThemeProvider>
 						<Toaster closeButton position="top-right" theme="system" visibleToasts={3} richColors />

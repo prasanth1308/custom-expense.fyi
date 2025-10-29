@@ -1,0 +1,4 @@
+{
+  "disabledCommands": ["prisma", "npx prisma"],
+  "autoExecute": false
+}
