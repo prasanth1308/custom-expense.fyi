@@ -119,7 +119,7 @@ model investments {
 
 model users {
   id                         String          @id @db.Uuid
-  email                      String
+  email                      String          @unique
   created_at                 DateTime        @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
   currency                   String          @default("INR")
