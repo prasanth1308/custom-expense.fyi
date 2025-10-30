@@ -32,12 +32,20 @@ export async function POST(request: NextRequest) {
 			}
 
 			// Create user in database (vault will be created during signup flow)
-			await prisma.users.create({
-				data: {
-					id: authData.user.id,
-					email
-				}
-			});
+            try {
+                await prisma.users.create({
+                    data: {
+                        id: authData.user.id,
+                        email
+                    }
+                });
+            } catch (err: any) {
+                // Handle unique constraint violation on email
+                if (err?.code === 'P2002') {
+                    return NextResponse.json({ message: messages.account.exist }, { status: 409 });
+                }
+                throw err;
+            }
 
 			// Then generate the magic link for the newly created user
 			const { data, error } = await supabaseAdmin.auth.admin.generateLink({
@@ -64,8 +72,12 @@ export async function POST(request: NextRequest) {
 			} catch (err: any) {
 				throw err;
 			}
-		} catch (error: any) {
-			return NextResponse.json({ message: String(error) || messages.error }, { status: 500 });
+        } catch (error: any) {
+            // Surface a clearer response if a duplicate email slips through a race condition
+            if (error?.code === 'P2002') {
+                return NextResponse.json({ message: messages.account.exist }, { status: 409 });
+            }
+            return NextResponse.json({ message: String(error) || messages.error }, { status: 500 });
 		}
 	} else {
 		return NextResponse.json({ message: messages.account.exist }, { status: 500 });

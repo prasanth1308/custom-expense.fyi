@@ -1,0 +1,64 @@
+name: Restore Latest Supabase Backup to SRC_DB
+
+on:
+  workflow_dispatch:  # Manual trigger (can add scheduled trigger if wanted)
+
+jobs:
+  restore-latest:
+    runs-on: ubuntu-latest
+    env:
+      SRC_DB: ${{ secrets.SRC_DB }}
+
+    steps:
+      - name: 🧩 Install PostgreSQL 17 client
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: ⬇️ Download latest backup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: supabase-backup
+
+      - name: 🧹 Clean SRC_DB (Public Schema Only)
+        run: |
+          set -e
+          echo "🧹 Recreating public schema on SRC_DB..."
+          psql "$SRC_DB" -c "DROP SCHEMA IF EXISTS public CASCADE;"
+          psql "$SRC_DB" -c "CREATE SCHEMA public;"
+          psql "$SRC_DB" -c "GRANT ALL ON SCHEMA public TO postgres;"
+          psql "$SRC_DB" -c "GRANT ALL ON SCHEMA public TO public;"
+
+      - name: 🔄 Restore to SRC_DB
+        run: |
+          set -e
+          COMPRESSED_FILE=$(ls supabase_backup_*.dump.gz | sort -r | head -n 1)
+          BACKUP_FILE="${COMPRESSED_FILE%.gz}"
+          echo "🟢 Restoring from $COMPRESSED_FILE..."
+          gunzip -c "$COMPRESSED_FILE" > "$BACKUP_FILE"
+
+          # Exclude problematic list items as before
+          /usr/lib/postgresql/17/bin/pg_restore -l "$BACKUP_FILE" | \
+            grep -v "EVENT TRIGGER" | \
+            grep -v "ROW SECURITY" > restore.list
+
+          /usr/lib/postgresql/17/bin/pg_restore \
+            --no-owner \
+            --no-privileges \
+            --no-comments \
+            --exclude-schema=extensions \
+            --exclude-schema=pgbouncer \
+            --exclude-schema=auth \
+            --exclude-schema=storage \
+            --exclude-schema=supabase_functions \
+            --use-list=restore.list \
+            --clean \
+            --if-exists \
+            -v -d "$SRC_DB" "$BACKUP_FILE" || {
+              echo "⚠️ Restore completed with warnings (possible for Supabase)"
+              exit 0
+            }
+
+          echo "✅ SRC_DB Restore completed!"
