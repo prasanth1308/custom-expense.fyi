@@ -1,8 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
-import logo from 'public/icons/logo.svg';
-
+import Logo from 'components/logo';
 import Footer from 'components/footer';
 import Features from 'components/home/features';
 
@@ -16,7 +14,7 @@ export default function Home() {
 			<header className="relative m-auto h-[56px] max-w-4xl pt-3">
 				<div className="absolute left-0 right-0 top-3 z-20 flex items-center justify-between">
 					<Link href={'/'} className="flex max-w-[180px] items-center p-3 text-2xl">
-						<Image src={logo} width={30} height={30} alt={`${getAppName()} logo`} className="mr-2" />
+						<Logo width={30} height={30} className="mr-2" />
 						<span className="font-black tracking-[-0.03em] text-gray-900">{getAppName()}</span>
 					</Link>
 					<Link

@@ -137,6 +137,8 @@ model users {
   premium_plan_expired_email Boolean         @default(false)
   premium_usage_limit_email  Boolean         @default(false)
   monthly_email_report       Boolean         @default(false)
+  color_scheme               String          @default("default")
+  logo_url                   String?
   vault_members              vault_members[] @relation("VaultMember")
   owned_vaults               vaults[]        @relation("VaultOwner")
 }

@@ -23,6 +23,8 @@ interface User {
 	premium_plan_expired_email: boolean;
 	premium_usage_limit_email: boolean;
 	monthly_email_report: boolean;
+	color_scheme: string;
+	logo_url: string | null;
 	isPremium: boolean;
 	isPremiumPlanEnded: boolean;
 }

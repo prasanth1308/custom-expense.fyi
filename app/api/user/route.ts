@@ -32,6 +32,8 @@ export async function GET() {
 					email: true,
 					plan_status: true,
 					new_signup_email: true,
+					color_scheme: true,
+					logo_url: true,
 				},
 			});
 			const isPremiumPlan = data?.order_status === 'paid' && data?.plan_status === 'premium';
@@ -47,10 +49,15 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-	const { currency, locale } = await request.json();
+	const { currency, locale, color_scheme, logo_url } = await request.json();
 	return await checkAuth(async (user: any) => {
 		try {
-			await prisma.users.update({ data: { currency, locale }, where: { id: user.id } });
+			const updateData: any = {};
+			if (currency !== undefined) updateData.currency = currency;
+			if (locale !== undefined) updateData.locale = locale;
+			if (color_scheme !== undefined) updateData.color_scheme = color_scheme;
+			if (logo_url !== undefined) updateData.logo_url = logo_url;
+			await prisma.users.update({ data: updateData, where: { id: user.id } });
 			return NextResponse.json('Updated');
 		} catch (error) {
 			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });

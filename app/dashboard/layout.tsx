@@ -9,6 +9,7 @@ import { AuthProvider } from 'components/context/auth-provider';
 import { SidebarContextProvider } from 'components/context/sidebar-provider';
 import { ThemeProvider } from 'components/context/theme-provider';
 import { VaultProvider } from 'components/context/vault-provider';
+import { ColorSchemeProvider } from 'components/color-scheme-provider';
 import DashboardLayout from 'components/layout';
 import Sidebar from 'components/sidebar';
 import { VaultGate } from 'components/vault-gate';
@@ -68,6 +69,7 @@ export default async function Layout({ children }: any) {
 					<NextTopLoader color="#0076ff" height={2} showSpinner={false} />
 					<AuthProvider user={user} accessToken={session?.access_token || null}>
 						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+							<ColorSchemeProvider />
 							<VaultProvider>
 								<VaultGate>
 									<main className="relative flex min-h-full min-w-full bg-background">
