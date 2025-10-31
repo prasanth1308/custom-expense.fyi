@@ -6,7 +6,7 @@ import prisma from 'lib/prisma';
 import messages from 'constants/messages';
 
 export async function POST(request: NextRequest) {
-	const { notes, name, price, category, date, units, vaultId } = await request.json();
+	const { notes, name, price, category, date, units, account_id, member_id, vaultId } = await request.json();
 	return await checkAuth(async (user: any) => {
 		try {
 			// Check vault permission for write access
@@ -16,7 +16,17 @@ export async function POST(request: NextRequest) {
 			}
 
 			await prisma.investments.create({
-				data: { notes, name, price, category, vault_id: vaultId, date, units },
+				data: {
+					notes,
+					name,
+					price,
+					category,
+					vault_id: vaultId,
+					date,
+					units,
+					account_id: account_id || null,
+					member_id: member_id || null,
+				},
 			});
 			return NextResponse.json('added', { status: 201 });
 		} catch (error) {

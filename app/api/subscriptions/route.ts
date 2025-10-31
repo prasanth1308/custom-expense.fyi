@@ -30,6 +30,37 @@ export async function GET(request: NextRequest) {
 			const data = await prisma.subscriptions.findMany({
 				where: { vault_id: vaultId },
 				orderBy: { date: 'desc' },
+				select: {
+					id: true,
+					name: true,
+					notes: true,
+					url: true,
+					price: true,
+					paid: true,
+					notify: true,
+					date: true,
+					created_at: true,
+					updated_at: true,
+					active: true,
+					cancelled_at: true,
+					nameHash: true,
+					vault_id: true,
+					account_id: true,
+					member_id: true,
+					account: {
+						select: {
+							id: true,
+							name: true,
+							type: true,
+						},
+					},
+					member: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
+				},
 			});
 
 			let updatedDate = data.map((datum) => {
@@ -79,7 +110,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-	const { notes, name, price, paid, id, url, date, active, cancelled_at, vaultId } = await request.json();
+	const { notes, name, price, paid, id, url, date, active, cancelled_at, account_id, member_id, vaultId } = await request.json();
 
 	return await checkAuth(async (user: any) => {
 		if (!id || !vaultId) {
@@ -93,8 +124,11 @@ export async function PUT(request: NextRequest) {
 		}
 
 		try {
+			const updateData: any = { notes, name, price, date, url, paid, active, cancelled_at };
+			if (account_id !== undefined) updateData.account_id = account_id || null;
+			if (member_id !== undefined) updateData.member_id = member_id || null;
 			await prisma.subscriptions.update({
-				data: { notes, name, price, date, url, paid, active, cancelled_at },
+				data: updateData,
 				where: { id },
 			});
 			return NextResponse.json('updated', { status: 200 });

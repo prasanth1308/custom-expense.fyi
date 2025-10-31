@@ -45,24 +45,28 @@ model vault_members {
 }
 
 model subscriptions {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   /// @encrypted
   name         String
   /// @encrypted
   notes        String?
   url          String
   /// @encrypted
-  price        String   @default("0")
+  price        String    @default("0")
   paid         String
-  notify       Boolean  @default(false)
+  notify       Boolean   @default(false)
   date         String
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  active       Boolean? @default(true)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  active       Boolean?  @default(true)
   cancelled_at String?
   nameHash     String?
-  vault_id     String   @db.Uuid
-  vault        vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  vault_id     String    @db.Uuid
+  account_id   String?   @db.Uuid
+  member_id    String?   @db.Uuid
+  vault        vaults    @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  account      accounts? @relation(fields: [account_id], references: [id], onDelete: SetNull)
+  member       members?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
 }
 
 model expenses {
@@ -109,22 +113,26 @@ model income {
 }
 
 model investments {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   /// @encrypted
   name       String
   /// @encrypted
   notes      String?
   /// @encrypted
-  price      String   @default("0")
+  price      String    @default("0")
   /// @encrypted
-  units      String   @default("0")
+  units      String    @default("0")
   category   String
   date       String
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
   nameHash   String?
-  vault_id   String   @db.Uuid
-  vault      vaults   @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  vault_id   String    @db.Uuid
+  account_id String?   @db.Uuid
+  member_id  String?   @db.Uuid
+  vault      vaults    @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  account    accounts? @relation(fields: [account_id], references: [id], onDelete: SetNull)
+  member     members?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
 }
 
 model users {
@@ -154,42 +162,46 @@ model users {
 }
 
 model accounts {
-  id               String     @id @default(uuid()) @db.Uuid
+  id               String          @id @default(uuid()) @db.Uuid
   /// @encrypted
   name             String
   type             String
   /// @encrypted
-  starting_balance String     @default("0")
+  starting_balance String          @default("0")
   /// @encrypted
   notes            String?
-  active           Boolean    @default(true)
-  created_at       DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
-  vault_id         String     @db.Uuid
-  member_id        String?    @db.Uuid
-  vault            vaults     @relation(fields: [vault_id], references: [id], onDelete: Cascade)
-  member           members?   @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  active           Boolean         @default(true)
+  created_at       DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  vault_id         String          @db.Uuid
+  member_id        String?         @db.Uuid
+  vault            vaults          @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  member           members?        @relation(fields: [member_id], references: [id], onDelete: SetNull)
   expenses         expenses[]
   income           income[]
+  subscriptions    subscriptions[]
+  investments      investments[]
 
   @@index([vault_id])
   @@index([member_id])
 }
 
 model members {
-  id         String     @id @default(uuid()) @db.Uuid
+  id            String          @id @default(uuid()) @db.Uuid
   /// @encrypted
-  name       String
+  name          String
   /// @encrypted
-  notes      String?
-  active     Boolean    @default(true)
-  created_at DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
-  vault_id   String     @db.Uuid
-  vault      vaults     @relation(fields: [vault_id], references: [id], onDelete: Cascade)
-  accounts   accounts[]
-  expenses   expenses[]
-  income     income[]
+  notes         String?
+  active        Boolean         @default(true)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  vault_id      String          @db.Uuid
+  vault         vaults          @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  accounts      accounts[]
+  expenses      expenses[]
+  income        income[]
+  subscriptions subscriptions[]
+  investments   investments[]
 
   @@index([vault_id])
 }

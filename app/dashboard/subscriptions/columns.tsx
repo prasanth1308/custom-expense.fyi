@@ -14,7 +14,20 @@ import { formatCurrency, formatDate } from 'lib/formatter';
 
 import { SubscriptionsData } from './apis';
 
-export const columns: ColumnDef<SubscriptionsData>[] = [
+// Extend SubscriptionsData to include account and member in columns
+type SubscriptionsDataWithRelations = SubscriptionsData & {
+	account?: {
+		id: string;
+		name: string;
+		type: string;
+	} | null;
+	member?: {
+		id: string;
+		name: string;
+	} | null;
+};
+
+export const columns: ColumnDef<SubscriptionsDataWithRelations>[] = [
 	{
 		accessorKey: 'name',
 		header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
@@ -100,6 +113,22 @@ export const columns: ColumnDef<SubscriptionsData>[] = [
 					) : null}
 				</div>
 			);
+		},
+	},
+	{
+		accessorKey: 'account',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Account" />,
+		cell: ({ row }) => {
+			const account = row.original?.account;
+			return <div className="">{account?.name || 'Not assigned'}</div>;
+		},
+	},
+	{
+		accessorKey: 'member',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Member" />,
+		cell: ({ row }) => {
+			const member = row.original?.member;
+			return <div className="">{member?.name || 'Family'}</div>;
 		},
 	},
 	{ accessorKey: 'notes', header: 'Notes' },
