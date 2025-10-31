@@ -89,6 +89,14 @@ async function migrateRecord(client: PrismaClient, cursor: Cursor | undefined) {
  *     "income": {
  *       "modelName": "income",
  *       "isList": true
+ *     },
+ *     "subscriptions": {
+ *       "modelName": "subscriptions",
+ *       "isList": true
+ *     },
+ *     "investments": {
+ *       "modelName": "investments",
+ *       "isList": true
  *     }
  *   }
  * }

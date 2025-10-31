@@ -15,6 +15,8 @@ export type SubscriptionsData = {
 	active?: boolean;
 	notify?: string;
 	date: string;
+	account_id?: string | null;
+	member_id?: string | null;
 	vaultId?: string;
 };
 

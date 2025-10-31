@@ -7,6 +7,8 @@ export type InvestmentData = {
 	category: string;
 	units: number;
 	date: string;
+	account_id?: string | null;
+	member_id?: string | null;
 	id?: string | null;
 	vaultId?: string;
 };
