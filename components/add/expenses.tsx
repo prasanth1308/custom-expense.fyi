@@ -40,6 +40,8 @@ const initialState = {
 	price: '',
 	date: '',
 	id: null,
+	account_id: null,
+	member_id: null,
 	autocomplete: [],
 };
 
@@ -49,6 +51,8 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 	const todayDate = format(new Date(), dateFormat);
 	const [state, setState] = useState<any>({ ...initialState, date: todayDate });
 	const [loading, setLoading] = useState(false);
+	const [accounts, setAccounts] = useState<any[]>([]);
+	const [members, setMembers] = useState<any[]>([]);
 	const inputRef = useRef<any>(null);
 
 	useEffect(() => {
@@ -59,11 +63,36 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 		() =>
 			setState(
 				selected.id
-					? { ...selected, ...{ paid_via: selected.paid_via ? selected.paid_via : initialState.paid_via } }
+					? {
+							...selected,
+							...{
+								paid_via: selected.paid_via ? selected.paid_via : initialState.paid_via,
+								account_id: selected.account_id || null,
+								member_id: selected.member_id || null,
+							},
+					  }
 					: { ...initialState, date: todayDate }
 			),
 		[selected, todayDate]
 	);
+
+	// Fetch accounts and members for dropdowns
+	useEffect(() => {
+		if (show && currentVault?.id) {
+			Promise.all([
+				fetch(`/api/accounts?vaultId=${currentVault.id}`).then((res) => res.json()),
+				fetch(`/api/members?vaultId=${currentVault.id}`).then((res) => res.json()),
+			])
+				.then(([accountsData, membersData]) => {
+					setAccounts(accountsData.filter((a: any) => a.active));
+					setMembers(membersData.filter((m: any) => m.active));
+				})
+				.catch(() => {
+					setAccounts([]);
+					setMembers([]);
+				});
+		}
+	}, [show, currentVault?.id]);
 
 	const onLookup = useMemo(() => {
 		const callbackHandler = (value: string) => {
@@ -226,6 +255,40 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 										</option>
 									);
 								})}
+							</select>
+						</div>
+					</div>
+					<div className="grid grid-cols-[50%,50%] gap-3">
+						<div className="mr-3">
+							<Label htmlFor="account">Account (Optional)</Label>
+							<select
+								id="account"
+								className="mt-1.5 flex h-9 max-sm:h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								onChange={(event) => setState({ ...state, account_id: event.target.value || null })}
+								value={state.account_id || ''}
+							>
+								<option value="">Not assigned</option>
+								{accounts.map((account) => (
+									<option key={account.id} value={account.id}>
+										{account.name}
+									</option>
+								))}
+							</select>
+						</div>
+						<div className="mr-3">
+							<Label htmlFor="member">Member (Optional)</Label>
+							<select
+								id="member"
+								className="mt-1.5 flex h-9 max-sm:h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								onChange={(event) => setState({ ...state, member_id: event.target.value || null })}
+								value={state.member_id || ''}
+							>
+								<option value="">Family</option>
+								{members.map((member) => (
+									<option key={member.id} value={member.id}>
+										{member.name}
+									</option>
+								))}
 							</select>
 						</div>
 					</div>

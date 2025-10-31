@@ -11,14 +11,16 @@ import { useVault } from 'components/context/vault-provider';
 
 import shortcuts from 'constants/shortcuts';
 
+import AddAccounts from './add/accounts';
 import AddExpense from './add/expenses';
 import AddIncome from './add/income';
 import AddInvestments from './add/investments';
+import AddMembers from './add/members';
 import AddSubscriptions from './add/subscriptions';
 
 const openShortcutKey = Object.values(shortcuts.modal.open.shortcut);
 
-type TypeProps = 'expenses' | 'income' | 'investments' | 'subscriptions';
+type TypeProps = 'expenses' | 'income' | 'investments' | 'subscriptions' | 'accounts' | 'members';
 
 type AddProps = {
 	mutate?: any;
@@ -115,6 +117,34 @@ export default function Add({ mutate, type, selected = {}, onHide, onLookup }: A
 			) : null}
 			{type === 'subscriptions' ? (
 				<AddSubscriptions
+					lookup={(value: string) => {
+						if (onLookup) return onLookup(value);
+					}}
+					show={show}
+					selected={selected}
+					mutate={mutate}
+					onHide={() => {
+						if (onHide) onHide();
+						setShow(false);
+					}}
+				/>
+			) : null}
+			{type === 'accounts' ? (
+				<AddAccounts
+					lookup={(value: string) => {
+						if (onLookup) return onLookup(value);
+					}}
+					show={show}
+					selected={selected}
+					mutate={mutate}
+					onHide={() => {
+						if (onHide) onHide();
+						setShow(false);
+					}}
+				/>
+			) : null}
+			{type === 'members' ? (
+				<AddMembers
 					lookup={(value: string) => {
 						if (onLookup) return onLookup(value);
 					}}

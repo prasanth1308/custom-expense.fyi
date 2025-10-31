@@ -28,4 +28,14 @@ export const apiUrls = {
 		modify: '/api/subscriptions',
 		getSubscriptions: ({ from, to }: { from: string; to: string }) => `/api/subscriptions?from=${from}&to=${to}`,
 	},
+	accounts: {
+		add: '/api/accounts/add',
+		modify: '/api/accounts',
+		getAccounts: () => '/api/accounts',
+	},
+	members: {
+		add: '/api/members/add',
+		modify: '/api/members',
+		getMembers: () => '/api/members',
+	},
 };

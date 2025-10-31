@@ -83,6 +83,14 @@ async function migrateRecord(client: PrismaClient, cursor: Cursor | undefined) {
  *     "vault": {
  *       "modelName": "vaults",
  *       "isList": false
+ *     },
+ *     "account": {
+ *       "modelName": "accounts",
+ *       "isList": false
+ *     },
+ *     "member": {
+ *       "modelName": "members",
+ *       "isList": false
  *     }
  *   }
  * }

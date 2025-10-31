@@ -7,6 +7,8 @@ export type ExpenseData = {
 	category: string;
 	date: string;
 	paid_via: string;
+	account_id?: string | null;
+	member_id?: string | null;
 	id: string | null;
 	vaultId?: string;
 };

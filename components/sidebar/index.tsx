@@ -11,9 +11,11 @@ import Image from 'next/image';
 import { useUser } from 'components/context/auth-provider';
 import { useSidebar } from 'components/context/sidebar-provider';
 import {
+	AccountsIcon,
 	ExpensesIcon,
 	IncomeIcon,
 	InvestmentIcon,
+	MembersIcon,
 	OverviewIcon,
 	SettingsIcon,
 	SignoutIcon,
@@ -44,6 +46,18 @@ const dashboardLinks = [
 		href: '/subscriptions',
 		Icon: SubscriptionsIcon,
 		shortcutText: shortcuts.menu.subscriptions.shortcut,
+	},
+	{
+		name: 'Accounts',
+		href: '/accounts',
+		Icon: AccountsIcon,
+		shortcutText: shortcuts.menu.accounts.shortcut,
+	},
+	{
+		name: 'Members',
+		href: '/members',
+		Icon: MembersIcon,
+		shortcutText: shortcuts.menu.members.shortcut,
 	},
 ];
 
