@@ -2,6 +2,7 @@ import LayoutHeader from 'components/layout/header';
 import { getAppName } from 'lib/config';
 
 import Account from './account';
+import Branding from './branding';
 import DeleteAccount from './delete-account';
 import Plans from './plans';
 import Theme from './theme';
@@ -23,6 +24,7 @@ export default async function Page() {
 				<div className="m-auto flex w-full max-w-2xl flex-col items-center space-y-6">
 					<Account />
 					<Theme />
+					<Branding />
 					<Usage />
 					<Plans />
 					<DeleteAccount />

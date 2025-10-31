@@ -1,8 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
-import logo from 'public/icons/logo.svg';
-
+import Logo from 'components/logo';
 import Footer from 'components/footer';
 import { getAppBaseUrl, getAppName } from 'lib/config';
 
@@ -34,7 +32,7 @@ export default function SignUp() {
 			<div className="absolute z-50 m-auto flex w-[380px] flex-1 flex-col justify-center p-6 sm:w-[468px] sm:p-10">
 				<Link href={getAppBaseUrl()}>
 					<h1 className="flex flex-col items-center text-3xl">
-						<Image className="active:scale-95" src={logo} width={50} height={50} alt={`${getAppName()} logo`} />
+						<Logo className="active:scale-95" width={50} height={50} />
 						<span className="mt-2 font-black text-gray-900">{getAppName()}</span>
 					</h1>
 				</Link>

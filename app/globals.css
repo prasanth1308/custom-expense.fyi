@@ -76,6 +76,116 @@ html {
 
 		--ring: 240 3.7% 15.9%;
 	}
+
+	/* Color Scheme 1: Blue */
+	.color-scheme-blue {
+		--primary: 221 83% 53%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-blue.dark {
+		--primary: 217 91% 60%;
+		--primary-foreground: 222 47% 11%;
+	}
+
+	/* Color Scheme 2: Purple */
+	.color-scheme-purple {
+		--primary: 262 83% 58%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-purple.dark {
+		--primary: 263 70% 50.4%;
+		--primary-foreground: 210 20% 98%;
+	}
+
+	/* Color Scheme 3: Green */
+	.color-scheme-green {
+		--primary: 142 76% 36%;
+		--primary-foreground: 355 100% 97%;
+	}
+
+	.color-scheme-green.dark {
+		--primary: 142 71% 45%;
+		--primary-foreground: 144 61% 20%;
+	}
+
+	/* Color Scheme 4: Red */
+	.color-scheme-red {
+		--primary: 0 72% 51%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-red.dark {
+		--primary: 0 63% 31%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	/* Color Scheme 5: Orange */
+	.color-scheme-orange {
+		--primary: 25 95% 53%;
+		--primary-foreground: 60 9% 98%;
+	}
+
+	.color-scheme-orange.dark {
+		--primary: 24 96% 53%;
+		--primary-foreground: 60 9% 10%;
+	}
+
+	/* Color Scheme 6: Teal */
+	.color-scheme-teal {
+		--primary: 173 80% 40%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-teal.dark {
+		--primary: 174 81% 51%;
+		--primary-foreground: 178 100% 97%;
+	}
+
+	/* Color Scheme 7: Pink */
+	.color-scheme-pink {
+		--primary: 330 81% 60%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-pink.dark {
+		--primary: 346 77% 49.8%;
+		--primary-foreground: 355 100% 97%;
+	}
+
+	/* Color Scheme 8: Indigo */
+	.color-scheme-indigo {
+		--primary: 239 84% 67%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-indigo.dark {
+		--primary: 234 89% 74%;
+		--primary-foreground: 224 71% 4%;
+	}
+
+	/* Color Scheme 9: Amber */
+	.color-scheme-amber {
+		--primary: 43 96% 56%;
+		--primary-foreground: 20 14% 4%;
+	}
+
+	.color-scheme-amber.dark {
+		--primary: 48 96% 53%;
+		--primary-foreground: 20 14% 4%;
+	}
+
+	/* Color Scheme 10: Cyan */
+	.color-scheme-cyan {
+		--primary: 188 94% 42%;
+		--primary-foreground: 0 0% 98%;
+	}
+
+	.color-scheme-cyan.dark {
+		--primary: 187 100% 45%;
+		--primary-foreground: 186 100% 98%;
+	}
 }
 
 @layer base {

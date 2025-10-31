@@ -1,13 +1,14 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import SvgWhiteLogo from 'public/icons/white-logo.svg';
 import { useHotkeys } from 'react-hotkeys-hook';
+import Image from 'next/image';
 
+import { useUser } from 'components/context/auth-provider';
 import { useSidebar } from 'components/context/sidebar-provider';
 import {
 	ExpensesIcon,
@@ -62,6 +63,7 @@ export default function Sidebar() {
 	const router = useRouter();
 	const supabase = createClientComponentClient();
 	const { show, setShow } = useSidebar();
+	const user = useUser();
 
 	useHotkeys(
 		menuShortcutList,
@@ -102,7 +104,18 @@ export default function Sidebar() {
 								href="/"
 								className="mt-[3px] active:scale-95 rounded-lg p-1 transition-all focus:outline-none"
 							>
-								<Image className="block" src={SvgWhiteLogo} width={30} height={30} alt={getAppName()} />
+								{user?.logo_url ? (
+									<Image
+										className="block"
+										src={user.logo_url}
+										width={30}
+										height={30}
+										alt={getAppName()}
+										style={{ objectFit: 'contain' }}
+									/>
+								) : (
+									<Image className="block" src={SvgWhiteLogo} width={30} height={30} alt={getAppName()} />
+								)}
 							</Link>
 							<Separator className="mb-2 mt-[8px] border-t border-gray-100 opacity-[0.2]" />
 							{dashboardLinks.map((link, index) => {
