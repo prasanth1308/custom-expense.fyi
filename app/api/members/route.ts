@@ -5,28 +5,12 @@ import prisma from 'lib/prisma';
 
 import messages from 'constants/messages';
 
-type Where = {
-	vault_id: string;
-	date?: {
-		lte: string;
-		gte: string;
-	};
-	categories?: {
-		contains: string;
-	};
-};
-
 export async function GET(request: NextRequest) {
 	const { searchParams } = request.nextUrl;
-	const from = searchParams.get('from') || '';
-	const to = searchParams.get('to') || '';
-	const categories: any = searchParams.get('categories') || '';
 	const vaultId = searchParams.get('vaultId') || '';
-	const OR = { OR: categories?.split(',').map((category: any) => ({ category: { contains: category } })) };
 
 	return await checkAuth(async (user: any) => {
 		try {
-			// Check vault permission
 			if (!vaultId) {
 				return NextResponse.json({ message: 'Vault ID is required' }, { status: 400 });
 			}
@@ -36,66 +20,46 @@ export async function GET(request: NextRequest) {
 				return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
 			}
 
-			const where = {
-				vault_id: vaultId,
-				...(categories.length && OR),
-				...(to && from && { date: { lte: to, gte: from } }),
-			};
-
-			const data = await prisma.income.findMany({
-				where,
+			const members = await prisma.members.findMany({
+				where: {
+					vault_id: vaultId,
+				},
 				orderBy: { updated_at: 'desc' },
 				select: {
-					notes: true,
-					name: true,
-					price: true,
-					category: true,
 					id: true,
-					date: true,
+					name: true,
+					notes: true,
+					active: true,
 					created_at: true,
 					updated_at: true,
-					account_id: true,
-					member_id: true,
-					account: {
-						select: {
-							id: true,
-							name: true,
-							type: true,
-						},
-					},
-					member: {
-						select: {
-							id: true,
-							name: true,
-						},
-					},
 				},
 			});
-			return NextResponse.json(data.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)));
-		} catch (error) {
-			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
-		}
-	});
-}
 
-export async function DELETE(request: NextRequest) {
-	const { id, vaultId } = await request.json();
-	return await checkAuth(async (user: any) => {
-		if (!id.length || !vaultId) {
-			return NextResponse.json(messages.request.invalid, { status: 400 });
-		}
+			// Calculate linked accounts count and transaction counts for each member
+			const membersWithCounts = await Promise.all(
+				members.map(async (member) => {
+					const accountsCount = await prisma.accounts.count({
+						where: { member_id: member.id, active: true },
+					});
 
-		// Check vault permission for write access
-		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
-		if (!hasPermission) {
-			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
-		}
+					const expensesCount = await prisma.expenses.count({
+						where: { member_id: member.id },
+					});
 
-		try {
-			await prisma.income.delete({
-				where: { id: id[0] },
-			});
-			return NextResponse.json('deleted', { status: 200 });
+					const incomeCount = await prisma.income.count({
+						where: { member_id: member.id },
+					});
+
+					return {
+						...member,
+						linked_accounts_count: accountsCount,
+						expenses_count: expensesCount,
+						income_count: incomeCount,
+					};
+				})
+			);
+
+			return NextResponse.json(membersWithCounts);
 		} catch (error) {
 			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
 		}
@@ -103,24 +67,25 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-	const { notes, name, price, category, id, date, account_id, member_id, vaultId } = await request.json();
+	const { id, name, notes, active, vaultId } = await request.json();
 
 	return await checkAuth(async (user: any) => {
 		if (!id || !vaultId) {
 			return NextResponse.json(messages.request.invalid, { status: 400 });
 		}
 
-		// Check vault permission for write access
 		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
 		if (!hasPermission) {
 			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
 		}
 
 		try {
-			const updateData: any = { notes, name, price, date, category };
-			if (account_id !== undefined) updateData.account_id = account_id || null;
-			if (member_id !== undefined) updateData.member_id = member_id || null;
-			await prisma.income.update({
+			const updateData: any = {};
+			if (name !== undefined) updateData.name = name;
+			if (notes !== undefined) updateData.notes = notes;
+			if (active !== undefined) updateData.active = active;
+
+			await prisma.members.update({
 				data: updateData,
 				where: { id },
 			});
@@ -130,3 +95,30 @@ export async function PUT(request: NextRequest) {
 		}
 	});
 }
+
+export async function DELETE(request: NextRequest) {
+	const { id, vaultId } = await request.json();
+
+	return await checkAuth(async (user: any) => {
+		if (!id || !vaultId) {
+			return NextResponse.json(messages.request.invalid, { status: 400 });
+		}
+
+		const hasPermission = await checkVaultPermission(user.id, vaultId, 'write');
+		if (!hasPermission) {
+			return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+		}
+
+		try {
+			// Soft delete - set active to false
+			await prisma.members.update({
+				data: { active: false },
+				where: { id },
+			});
+			return NextResponse.json('deleted', { status: 200 });
+		} catch (error) {
+			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+		}
+	});
+}
+

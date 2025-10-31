@@ -6,6 +6,8 @@ export type IncomeData = {
 	price: string;
 	category: string;
 	date: string;
+	account_id?: string | null;
+	member_id?: string | null;
 	id?: string | null;
 	vaultId?: string;
 };

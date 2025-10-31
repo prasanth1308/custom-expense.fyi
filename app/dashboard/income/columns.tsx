@@ -15,11 +15,21 @@ export type Income = {
 	date: string;
 	price: string;
 	category: string;
-	paid_via: string;
 	notes: string;
 	created_at: string;
 	updated_at: string;
 	id: string;
+	account_id?: string | null;
+	member_id?: string | null;
+	account?: {
+		id: string;
+		name: string;
+		type: string;
+	} | null;
+	member?: {
+		id: string;
+		name: string;
+	} | null;
 	actions: string;
 };
 
@@ -72,7 +82,22 @@ export const columns: ColumnDef<Income>[] = [
 			return value.includes(row.getValue(id));
 		},
 	},
-
+	{
+		accessorKey: 'account',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Account" />,
+		cell: ({ row }) => {
+			const account = row.original.account;
+			return <div className="">{account?.name || 'Not assigned'}</div>;
+		},
+	},
+	{
+		accessorKey: 'member',
+		header: ({ column }) => <DataTableColumnHeader column={column} title="Member" />,
+		cell: ({ row }) => {
+			const member = row.original.member;
+			return <div className="">{member?.name || 'Family'}</div>;
+		},
+	},
 	{ accessorKey: 'notes', header: 'Notes' },
 	{
 		accessorKey: 'actions',

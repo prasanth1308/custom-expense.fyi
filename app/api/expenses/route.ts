@@ -59,6 +59,21 @@ export async function GET(request: NextRequest) {
 					date: true,
 					created_at: true,
 					updated_at: true,
+					account_id: true,
+					member_id: true,
+					account: {
+						select: {
+							id: true,
+							name: true,
+							type: true,
+						},
+					},
+					member: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
 				},
 			});
 			return NextResponse.json(data.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)));
@@ -93,7 +108,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-	const { notes, name, price, category, id, date, paid_via, vaultId } = await request.json();
+	const { notes, name, price, category, id, date, paid_via, account_id, member_id, vaultId } = await request.json();
 
 	return await checkAuth(async (user: any) => {
 		if (!id || !vaultId) {
@@ -107,8 +122,11 @@ export async function PUT(request: NextRequest) {
 		}
 
 		try {
+			const updateData: any = { notes, name, price, date, paid_via, category };
+			if (account_id !== undefined) updateData.account_id = account_id || null;
+			if (member_id !== undefined) updateData.member_id = member_id || null;
 			await prisma.expenses.update({
-				data: { notes, name, price, date, paid_via, category },
+				data: updateData,
 				where: { id },
 			});
 			return NextResponse.json('updated', { status: 200 });

@@ -5,6 +5,8 @@ import { migrate as migratesubscriptions } from './subscriptions'
 import { migrate as migrateexpenses } from './expenses'
 import { migrate as migrateincome } from './income'
 import { migrate as migrateinvestments } from './investments'
+import { migrate as migrateaccounts } from './accounts'
+import { migrate as migratemembers } from './members'
 
 export interface ProgressReport {
   model: string
@@ -40,7 +42,9 @@ export type MigrationReport = {
   subscriptions: number,
   expenses: number,
   income: number,
-  investments: number
+  investments: number,
+  accounts: number,
+  members: number
 }
 
 /**
@@ -51,6 +55,8 @@ export type MigrationReport = {
  * - expenses
  * - income
  * - investments
+ * - accounts
+ * - members
  *
  * @returns a dictionary of the number of processed records per model.
  */
@@ -62,10 +68,14 @@ export async function migrate(
   const processedexpenses = await migrateexpenses(client, reportProgress)
   const processedincome = await migrateincome(client, reportProgress)
   const processedinvestments = await migrateinvestments(client, reportProgress)
+  const processedaccounts = await migrateaccounts(client, reportProgress)
+  const processedmembers = await migratemembers(client, reportProgress)
   return {
     subscriptions: processedsubscriptions,
     expenses: processedexpenses,
     income: processedincome,
-    investments: processedinvestments
+    investments: processedinvestments,
+    accounts: processedaccounts,
+    members: processedmembers
   }
 }
