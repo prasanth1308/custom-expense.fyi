@@ -6,7 +6,8 @@ import { Pencil, Trash2 } from 'lucide-react';
 import DataTableColumnHeader from 'components/table/data-table-column-header';
 import { Button } from 'components/ui/button';
 
-import { formatCurrency, formatDate } from 'lib/formatter';
+import CurrencyCell from 'components/currency-cell';
+import { formatDate } from 'lib/formatter';
 
 import { incomeCategory } from 'constants/categories';
 
@@ -53,8 +54,7 @@ export const columns: ColumnDef<Income>[] = [
 			} = props;
 			const user = options.meta?.user;
 			const price = parseFloat(row.getValue('price'));
-			const formatted = formatCurrency({ value: price, currency: user?.currency, locale: user?.locale });
-			return <div className="font-medium tabular-nums">{formatted}</div>;
+			return <CurrencyCell value={price} currency={user?.currency} locale={user?.locale} />;
 		},
 	},
 	{

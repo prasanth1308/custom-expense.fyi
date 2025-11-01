@@ -7,7 +7,7 @@ import DataTableColumnHeader from 'components/table/data-table-column-header';
 import { Button } from 'components/ui/button';
 import { Badge } from 'components/ui/badge';
 
-import { formatCurrency } from 'lib/formatter';
+import CurrencyCell from 'components/currency-cell';
 
 import { accountTypes } from 'constants/accounts';
 
@@ -68,8 +68,7 @@ export const columns: ColumnDef<Account>[] = [
 			} = props;
 			const user = options.meta?.user;
 			const balance = parseFloat(row.getValue('current_balance') || '0');
-			const formatted = formatCurrency({ value: balance, currency: user?.currency, locale: user?.locale });
-			return <div className="font-medium tabular-nums">{formatted}</div>;
+			return <CurrencyCell value={balance} currency={user?.currency} locale={user?.locale} />;
 		},
 	},
 	{

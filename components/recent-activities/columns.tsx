@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 
-import { formatCurrency } from 'lib/formatter';
+import CurrencyCell from 'components/currency-cell';
 
 export type recentActivities = {
 	no: string;
@@ -34,8 +34,7 @@ export const columns: ColumnDef<recentActivities>[] = [
 			} = props;
 			const user = options.meta?.user;
 			const price = parseFloat(row.getValue('amount'));
-			const formatted = formatCurrency({ value: price, currency: user?.currency, locale: user?.locale });
-			return <div className="tabular-nums font-medium">{formatted}</div>;
+			return <CurrencyCell value={price} currency={user?.currency} locale={user?.locale} className="tabular-nums font-medium" />;
 		},
 	},
 ];

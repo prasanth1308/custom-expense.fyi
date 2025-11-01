@@ -1,8 +1,12 @@
 'use client';
 
+import { Eye, EyeOff } from 'lucide-react';
+
+import { useAmountVisibility } from 'components/context/amount-visibility-provider';
 import { useSidebar } from 'components/context/sidebar-provider';
 import { Button } from 'components/ui/button';
 import { Separator } from 'components/ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 
 import DatePicker from '../datepicker';
 import { VaultSwitcher } from '../vault-switcher';
@@ -26,6 +30,7 @@ const MenuIcon = () => (
 
 export default function LayoutHeader({ title, showDatePicker = false }: { title: string; showDatePicker?: boolean }) {
 	const { show, setShow } = useSidebar();
+	const { showAmounts, toggleAmounts } = useAmountVisibility();
 	return (
 		<>
 			<div
@@ -46,7 +51,23 @@ export default function LayoutHeader({ title, showDatePicker = false }: { title:
 					</h2>
 					<VaultSwitcher />
 				</div>
-				<div className="flex items-center justify-between sm:mt-0">
+				<div className="flex items-center justify-between gap-2 sm:mt-0">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								onClick={toggleAmounts}
+								variant="ghost"
+								size="sm"
+								className="h-8 w-8 p-0"
+								aria-label={showAmounts ? 'Hide amounts' : 'Show amounts'}
+							>
+								{showAmounts ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>{showAmounts ? 'Hide amounts' : 'Show amounts'}</p>
+						</TooltipContent>
+					</Tooltip>
 					{showDatePicker ? (
 						<div className="date-picker mr-0 flex w-full items-center sm:mr-4 max-sm:mt-1">
 							{/* <span className="mr-2 hidden text-xs font-semibold uppercase md:inline-block">Showing:</span> */}

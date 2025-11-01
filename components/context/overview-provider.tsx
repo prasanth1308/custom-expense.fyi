@@ -19,6 +19,8 @@ interface Data {
 	income: Array<any>;
 	subscriptions: Array<any>;
 	investments: Array<any>;
+	accounts: Array<any>;
+	members: Array<any>;
 }
 
 export const OverviewContextProvider = (props: any) => {
@@ -45,17 +47,25 @@ export const OverviewContextProvider = (props: any) => {
 	const { data: subscriptionsData = [], isLoading: isSubscriptionsLoading } = useSWR(
 		shouldFetch ? apiUrls.subscriptions.getSubscriptions({ from, to }) + `&vaultId=${currentVault.id}` : null
 	);
+	const { data: accountsData = [], isLoading: isAccountsLoading } = useSWR(
+		shouldFetch ? apiUrls.accounts.getAccounts() + `?vaultId=${currentVault.id}` : null
+	);
+	const { data: membersData = [], isLoading: isMembersLoading } = useSWR(
+		shouldFetch ? apiUrls.members.getMembers() + `?vaultId=${currentVault.id}` : null
+	);
 
 	const data = {
 		expenses: expensesData,
 		investments: investmentsData,
 		income: incomeData,
 		subscriptions: subscriptionsData,
+		accounts: accountsData,
+		members: membersData,
 		mutate: {
 			mutateExpenses,
 		},
 	};
-	const loading = isExpenseLoading || isInvestmentsLoading || isIncomeLoading || isSubscriptionsLoading || vaultLoading;
+	const loading = isExpenseLoading || isInvestmentsLoading || isIncomeLoading || isSubscriptionsLoading || isAccountsLoading || isMembersLoading || vaultLoading;
 
 	return (
 		<OverviewContext.Provider value={{ loading, data }} {...others}>
