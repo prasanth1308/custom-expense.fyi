@@ -1,7 +1,10 @@
 'use client';
 
-import { Banknote, Briefcase, MoveDownRight, MoveUpRight, PiggyBank, PlayIcon, Wallet2 } from 'lucide-react';
+import { useMemo } from 'react';
 
+import { Banknote, Briefcase, CreditCard, MoveDownRight, MoveUpRight, PiggyBank, PlayIcon, Users, Wallet2 } from 'lucide-react';
+
+import { useAmountVisibility } from 'components/context/amount-visibility-provider';
 import { useUser } from 'components/context/auth-provider';
 import { useOverview } from 'components/context/overview-provider';
 import CardLoader from 'components/loader/card';
@@ -34,52 +37,91 @@ const Info = ({ value }: { value: number }) => {
 export default function Summary() {
 	const user = useUser();
 	const { data, loading } = useOverview();
+	const { showAmounts } = useAmountVisibility();
 
-	const totalExpenses = (data.expenses || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0);
-	const totalIncome = (data.income || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0);
-	const totalInvesments = (data.investments || []).reduce(
-		(acc: any, { price, units }: any) => Number(price) * Number(units) + acc,
-		0
+	const totalExpenses = useMemo(
+		() => (data.expenses || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0),
+		[data.expenses]
 	);
-	const totalSubscriptions = (data.subscriptions || []).reduce(
-		(acc: any, { price, paid_dates }: any) => Number(price) * (paid_dates?.length || 0) + acc,
-		0
+	const totalIncome = useMemo(
+		() => (data.income || []).reduce((acc: any, { price }: any) => Number(price) + acc, 0),
+		[data.income]
 	);
-	const totalSpent = totalExpenses + totalInvesments + totalSubscriptions;
-	const totalBalance = totalIncome - totalSpent;
+	const totalInvesments = useMemo(
+		() => (data.investments || []).reduce((acc: any, { price, units }: any) => Number(price) * Number(units) + acc, 0),
+		[data.investments]
+	);
+	const totalSubscriptions = useMemo(
+		() => (data.subscriptions || []).reduce((acc: any, { price, paid_dates }: any) => Number(price) * (paid_dates?.length || 0) + acc, 0),
+		[data.subscriptions]
+	);
+	const totalSpent = useMemo(() => totalExpenses + totalInvesments + totalSubscriptions, [totalExpenses, totalInvesments, totalSubscriptions]);
+	const totalBalance = useMemo(() => totalIncome - totalSpent, [totalIncome, totalSpent]);
+
+	// Accounts data
+	const activeAccounts = useMemo(() => (data.accounts || []).filter((account: any) => account.active), [data.accounts]);
+	const totalAccountsBalance = useMemo(
+		() => activeAccounts.reduce((acc: number, account: any) => acc + parseFloat(account.current_balance || '0'), 0),
+		[activeAccounts]
+	);
+
+	// Members data
+	const activeMembers = useMemo(() => (data.members || []).filter((member: any) => member.active), [data.members]);
 
 	return (
 		<>
 			<h2 className="mb-4 font-semibold text-primary dark:text-white">Summary</h2>
 			{loading ? (
-				<CardLoader cards={5} />
+				<CardLoader cards={8} />
 			) : (
-				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5">
+				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8">
 					<SummaryCard
 						icon={Briefcase}
 						title="total income"
-						data={formatCurrency({ value: totalIncome, currency: user.currency, locale: user.locale })}
+						isAmount={true}
+						data={formatCurrency({ value: totalIncome, currency: user.currency, locale: user.locale, showAmounts })}
 					/>
 					<SummaryCard
 						icon={Wallet2}
 						title="available balance"
-						data={formatCurrency({ value: totalBalance, currency: user.currency, locale: user.locale })}
+						isAmount={true}
+						data={formatCurrency({ value: totalBalance, currency: user.currency, locale: user.locale, showAmounts })}
 					/>
 					<SummaryCard
 						icon={Banknote}
 						title="total spent"
 						tooltip="Total of expenses + investments + subscriptions"
-						data={formatCurrency({ value: totalSpent, currency: user.currency, locale: user.locale })}
+						isAmount={true}
+						data={formatCurrency({ value: totalSpent, currency: user.currency, locale: user.locale, showAmounts })}
 					/>
 					<SummaryCard
 						icon={PiggyBank}
 						title="total investment"
-						data={formatCurrency({ value: totalInvesments, currency: user.currency, locale: user.locale })}
+						isAmount={true}
+						data={formatCurrency({ value: totalInvesments, currency: user.currency, locale: user.locale, showAmounts })}
 					/>
 					<SummaryCard
 						icon={PlayIcon}
 						title="total subscriptions"
-						data={formatCurrency({ value: totalSubscriptions, currency: user.currency, locale: user.locale })}
+						isAmount={true}
+						data={formatCurrency({ value: totalSubscriptions, currency: user.currency, locale: user.locale, showAmounts })}
+					/>
+					<SummaryCard
+						icon={CreditCard}
+						title="total accounts"
+						data={activeAccounts.length}
+					/>
+					<SummaryCard
+						icon={Wallet2}
+						title="total accounts balance"
+						tooltip="Sum of all active account balances"
+						isAmount={true}
+						data={formatCurrency({ value: totalAccountsBalance, currency: user.currency, locale: user.locale, showAmounts })}
+					/>
+					<SummaryCard
+						icon={Users}
+						title="total members"
+						data={activeMembers.length}
 					/>
 				</div>
 			)}

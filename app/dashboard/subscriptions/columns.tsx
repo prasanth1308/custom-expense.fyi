@@ -10,7 +10,8 @@ import DataTableColumnHeader from 'components/table/data-table-column-header';
 import { Button } from 'components/ui/button';
 import { Checkbox } from 'components/ui/checkbox';
 
-import { formatCurrency, formatDate } from 'lib/formatter';
+import CurrencyCell from 'components/currency-cell';
+import { formatDate } from 'lib/formatter';
 
 import { SubscriptionsData } from './apis';
 
@@ -62,10 +63,9 @@ export const columns: ColumnDef<SubscriptionsDataWithRelations>[] = [
 			const user = options.meta?.user;
 			const price = parseFloat(row.getValue('price'));
 			const paid = row.original?.paid;
-			const formatted = formatCurrency({ value: price, currency: user?.currency, locale: user?.locale });
 			return (
-				<div className="mb-1 mt-1 font-medium tabular-nums">
-					{formatted}
+				<div className="mb-1 mt-1">
+					<CurrencyCell value={price} currency={user?.currency} locale={user?.locale} className="font-medium tabular-nums" />
 					<p className="mt-[2px] text-xs text-muted-foreground"> per {paid.replace(/ly/, '')}</p>
 				</div>
 			);

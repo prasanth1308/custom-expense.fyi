@@ -18,7 +18,15 @@ type Date = {
 	dateStyle?: any;
 };
 
-export const formatCurrency = ({ value, currency = defaultCurrency, locale = defaultLocale }: Currency): any => {
+export const formatCurrency = ({ 
+	value, 
+	currency = defaultCurrency, 
+	locale = defaultLocale,
+	showAmounts = true 
+}: Currency & { showAmounts?: boolean }): any => {
+	if (!showAmounts) {
+		return '••••••';
+	}
 	try {
 		return new Intl.NumberFormat(locale, { ...currencyStyle, currency }).format(value).replace(/^(\D+)/, '$1 ');
 	} catch {

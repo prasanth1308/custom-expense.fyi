@@ -5,6 +5,7 @@ import Script from 'next/script';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import NextTopLoader from 'nextjs-toploader';
 
+import { AmountVisibilityProvider } from 'components/context/amount-visibility-provider';
 import { AuthProvider } from 'components/context/auth-provider';
 import { SidebarContextProvider } from 'components/context/sidebar-provider';
 import { ThemeProvider } from 'components/context/theme-provider';
@@ -70,20 +71,22 @@ export default async function Layout({ children }: any) {
 					<AuthProvider user={user} accessToken={session?.access_token || null}>
 						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 							<ColorSchemeProvider />
-							<VaultProvider>
-								<VaultGate>
-									<main className="relative flex min-h-full min-w-full bg-background">
-										<DashboardLayout>
-											<SidebarContextProvider>
-												<Sidebar />
-												<div className="h-full w-full sm:ml-[64px]">
-													<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
-												</div>
-											</SidebarContextProvider>
-										</DashboardLayout>
-									</main>
-								</VaultGate>
-							</VaultProvider>
+							<AmountVisibilityProvider>
+								<VaultProvider>
+									<VaultGate>
+										<main className="relative flex min-h-full min-w-full bg-background">
+											<DashboardLayout>
+												<SidebarContextProvider>
+													<Sidebar />
+													<div className="h-full w-full sm:ml-[64px]">
+														<div className="flex h-full w-full flex-col max-sm:ml-0">{children}</div>
+													</div>
+												</SidebarContextProvider>
+											</DashboardLayout>
+										</main>
+									</VaultGate>
+								</VaultProvider>
+							</AmountVisibilityProvider>
 						</ThemeProvider>
 						<Toaster closeButton position="top-right" theme="system" visibleToasts={3} richColors />
 					</AuthProvider>

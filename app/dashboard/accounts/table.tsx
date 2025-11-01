@@ -66,6 +66,7 @@ export default function AccountsTable() {
 				loading={loading}
 				filename="Accounts"
 				categories={accountTypeOptions}
+				hideViewOptions={true}
 			/>
 			<Add onHide={onHide} onLookup={onLookup} selected={selected} mutate={mutate} type="accounts" />
 		</>

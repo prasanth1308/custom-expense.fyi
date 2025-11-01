@@ -59,6 +59,7 @@ export default function MembersTable() {
 				data={data}
 				loading={loading}
 				filename="Members"
+				hideViewOptions={true}
 			/>
 			<Add onHide={onHide} onLookup={onLookup} selected={selected} mutate={mutate} type="members" />
 		</>

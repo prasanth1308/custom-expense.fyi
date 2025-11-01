@@ -130,3 +130,14 @@ The following files now use dynamic configuration:
 ✅ **Fallback Support**: Graceful degradation if env vars not set
 ✅ **SEO Friendly**: Dynamic metadata for each deployment
 
+
+
+நா மணிகண்டன்
+
+நாகந்திரன்
+
+8/476ஏ, காந்தி தெரு
+
+வசந்தா டிபன் ஷாப்
+
+விஜயநகரம்,  மேடவாக்கம்
