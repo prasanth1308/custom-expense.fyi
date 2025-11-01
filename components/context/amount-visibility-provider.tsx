@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const AmountVisibilityContext = createContext<{
+type AmountVisibilityContextType = {
 	showAmounts: boolean;
 	toggleAmounts: () => void;
-} | null>(null);
+};
+
+const AmountVisibilityContext = createContext<AmountVisibilityContextType | null>(null);
 
 const STORAGE_KEY = 'amount-visibility';
 
@@ -36,9 +38,9 @@ export const AmountVisibilityProvider = ({ children }: { children: React.ReactNo
 	);
 };
 
-export const useAmountVisibility = () => {
+export const useAmountVisibility = (): AmountVisibilityContextType => {
 	const context = useContext(AmountVisibilityContext);
-	if (context === undefined) {
+	if (context === null || context === undefined) {
 		throw new Error('useAmountVisibility must be used within AmountVisibilityProvider');
 	}
 	return context;
