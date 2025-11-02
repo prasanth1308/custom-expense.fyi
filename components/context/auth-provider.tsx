@@ -8,6 +8,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { SWRConfig } from 'swr';
 
 import fetcher from 'lib/fetcher';
+import { DEDUPING_INTERVAL } from 'lib/swr-config';
 
 interface User {
 	currency: string;
@@ -98,7 +99,27 @@ export const AuthProvider = (props: any) => {
 
 	return (
 		<AuthContext.Provider value={value} {...others}>
-			<SWRConfig value={{ fetcher }}>{session ? children : null}</SWRConfig>
+			<SWRConfig
+				value={{
+					fetcher,
+					revalidateIfStale: true,
+					revalidateOnFocus: false,
+					revalidateOnReconnect: true,
+					dedupingInterval: DEDUPING_INTERVAL,
+					onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+						// Don't retry on 4xx errors
+						if (error.status === 400 || error.status === 401 || error.status === 403 || error.status === 404) {
+							return;
+						}
+						// Retry up to 3 times for other errors
+						if (retryCount >= 3) return;
+						// Retry after 5 seconds
+						setTimeout(() => revalidate({ retryCount }), 5000);
+					},
+				}}
+			>
+				{session ? children : null}
+			</SWRConfig>
 		</AuthContext.Provider>
 	);
 };

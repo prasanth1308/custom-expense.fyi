@@ -2,6 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
+
+import { getSWRConfig } from 'lib/swr-config';
+import { getVaultsCacheKey } from 'lib/cache-keys';
 
 interface Vault {
   id: string;
@@ -33,36 +37,32 @@ const VaultContext = createContext<VaultContextType | undefined>(undefined);
 
 export function VaultProvider({ children }: { children: ReactNode }) {
   const [currentVault, setCurrentVault] = useState<Vault | null>(null);
-  const [vaults, setVaults] = useState<Vault[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const vaultsCacheKey = getVaultsCacheKey();
+  const swrConfig = getSWRConfig('less-dynamic');
 
+  const { data: vaultsData = [], isLoading, mutate } = useSWR<Vault[]>(
+    vaultsCacheKey,
+    swrConfig
+  );
+
+  const vaults = vaultsData || [];
   const hasNoVaults = !isLoading && vaults.length === 0;
 
-  const fetchVaults = async () => {
-    try {
-      const response = await fetch('/api/vaults');
-      if (response.ok) {
-        const data = await response.json();
-        setVaults(data);
-        
-        // Set current vault from localStorage or default to first vault
-        const savedVaultId = localStorage.getItem('currentVaultId');
-        const vaultToSet = savedVaultId 
-          ? data.find((v: Vault) => v.id === savedVaultId) || data[0]
-          : data[0];
-        
-        if (vaultToSet) {
-          setCurrentVault(vaultToSet);
-          localStorage.setItem('currentVaultId', vaultToSet.id);
-        }
+  useEffect(() => {
+    if (vaults.length > 0) {
+      // Set current vault from localStorage or default to first vault
+      const savedVaultId = localStorage.getItem('currentVaultId');
+      const vaultToSet = savedVaultId 
+        ? vaults.find((v: Vault) => v.id === savedVaultId) || vaults[0]
+        : vaults[0];
+      
+      if (vaultToSet) {
+        setCurrentVault(vaultToSet);
+        localStorage.setItem('currentVaultId', vaultToSet.id);
       }
-    } catch (error) {
-      console.error('Failed to fetch vaults:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [vaults]);
 
   const switchVault = (vaultId: string) => {
     const vault = vaults.find(v => v.id === vaultId);
@@ -75,7 +75,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshVaults = async () => {
-    await fetchVaults();
+    await mutate(undefined, { revalidate: true });
   };
 
   const createVault = async (name: string, description?: string) => {
@@ -108,6 +108,9 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error('Failed to share vault');
       }
+      
+      // Refresh vaults to get updated member list
+      await refreshVaults();
     } catch (error) {
       console.error('Failed to share vault:', error);
       throw error;
@@ -131,9 +134,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    fetchVaults();
-  }, []);
+  // Vaults are fetched via SWR, no need for manual fetch
 
   return (
     <VaultContext.Provider

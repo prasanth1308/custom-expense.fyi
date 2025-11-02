@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { useUser } from 'components/context/auth-provider';
 import { useVault } from 'components/context/vault-provider';
+import { useCacheInvalidation } from 'lib/cache-invalidation';
 import CircleLoader from 'components/loader/circle';
 import Modal from 'components/modal';
 import { Button } from 'components/ui/button';
@@ -39,6 +40,7 @@ const initialState = {
 export default function AddAccount({ show, onHide, mutate, selected, lookup }: AddAccountProps) {
 	const user = useUser();
 	const { currentVault } = useVault();
+	const { invalidateRelatedCaches } = useCacheInvalidation();
 	const [state, setState] = useState<any>(initialState);
 	const [loading, setLoading] = useState(false);
 	const [members, setMembers] = useState<any[]>([]);
@@ -83,6 +85,8 @@ export default function AddAccount({ show, onHide, mutate, selected, lookup }: A
 			}
 			setLoading(false);
 			toast.success(isEditing ? messages.updated : messages.success);
+			// Invalidate accounts cache and overview
+			await invalidateRelatedCaches('accounts', { vaultId: currentVault?.id });
 			if (mutate) mutate();
 			onHide();
 			setState(initialState);

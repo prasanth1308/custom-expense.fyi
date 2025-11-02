@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import AutoCompleteList from 'components/autocomplete-list';
 import { useUser } from 'components/context/auth-provider';
 import { useVault } from 'components/context/vault-provider';
+import { useCacheInvalidation } from 'lib/cache-invalidation';
 import CircleLoader from 'components/loader/circle';
 import Modal from 'components/modal';
 import { Button } from 'components/ui/button';
@@ -46,6 +47,7 @@ const initialState = {
 export default function AddIncome({ show, onHide, mutate, selected, lookup }: AddIncome) {
 	const user = useUser();
 	const { currentVault } = useVault();
+	const { invalidateRelatedCaches } = useCacheInvalidation();
 	const todayDate = format(new Date(), dateFormat);
 	const [state, setState] = useState<any>({ ...initialState, date: todayDate });
 	const [loading, setLoading] = useState(false);
@@ -110,6 +112,8 @@ export default function AddIncome({ show, onHide, mutate, selected, lookup }: Ad
 			}
 			setLoading(false);
 			toast.success(isEditing ? messages.updated : messages.success);
+			// Invalidate related caches (income, accounts, overview)
+			await invalidateRelatedCaches('income', { vaultId: currentVault?.id });
 			if (mutate) mutate();
 			onHide();
 			setState({ ...initialState });

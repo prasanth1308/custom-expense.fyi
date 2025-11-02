@@ -7,6 +7,8 @@ import useSWR from 'swr';
 import { views } from 'constants/table';
 import { getApiUrl } from 'constants/url';
 
+import { getEntityType, getSWRConfig } from 'lib/swr-config';
+
 import { useVault } from './vault-provider';
 
 const DataContext = createContext(null);
@@ -27,9 +29,13 @@ export const DataContextProvider = (props: Props) => {
 	const [filter, setFilter] = useState(views.thisMonth.key);
 	const [categories, setCategories] = useState<string[]>([]);
 
-	const { data = [], mutate, isLoading } = useSWR(
-		currentVault && !vaultLoading ? getApiUrl(filter, name, categories, isNotRange, currentVault.id) : null
-	);
+	const entityType = getEntityType(name);
+	const swrConfig = getSWRConfig(entityType);
+	const cacheKey = currentVault && !vaultLoading ? getApiUrl(filter, name, categories, isNotRange, currentVault.id) : null;
+
+	const { data = [], mutate, isLoading } = useSWR(cacheKey, {
+		...swrConfig,
+	});
 
 	const onFilter = useCallback((categories: string[] = []) => {
 		setCategories(categories);

@@ -8,6 +8,7 @@ import Add from 'components/add-button';
 import { useUser } from 'components/context/auth-provider';
 import { useData } from 'components/context/data-provider';
 import { useVault } from 'components/context/vault-provider';
+import { useCacheInvalidation } from 'lib/cache-invalidation';
 import DataTable from 'components/table/data-table';
 
 import { sortByKey } from 'lib/extractor';
@@ -23,6 +24,7 @@ export default function SubscriptionsTable() {
 	const { data, loading, filter, mutate } = useData();
 	const user = useUser();
 	const { currentVault } = useVault();
+	const { invalidateRelatedCaches } = useCacheInvalidation();
 
 	const onDelete = useCallback(
 		async (id: string) => {
@@ -33,12 +35,14 @@ export default function SubscriptionsTable() {
 				}
 				await deleteSubscription(id, currentVault.id);
 				toast.success(messages.deleted);
+				// Invalidate subscriptions cache and overview
+				await invalidateRelatedCaches('subscriptions', { vaultId: currentVault.id });
 				mutate();
 			} catch {
 				toast.error(messages.error);
 			}
 		},
-		[mutate, currentVault?.id]
+		[mutate, currentVault?.id, invalidateRelatedCaches]
 	);
 
 	const onChange = useCallback(
@@ -46,12 +50,14 @@ export default function SubscriptionsTable() {
 			try {
 				await editSubscription(data);
 				toast.success(messages.updated);
+				// Invalidate subscriptions cache and overview
+				await invalidateRelatedCaches('subscriptions', { vaultId: currentVault?.id });
 				mutate();
 			} catch {
 				toast.error(messages.error);
 			}
 		},
-		[mutate]
+		[mutate, currentVault?.id, invalidateRelatedCaches]
 	);
 
 	const onEdit = useCallback((data: SubscriptionsData | any) => {

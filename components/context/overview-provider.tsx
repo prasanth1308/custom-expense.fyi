@@ -9,6 +9,8 @@ import { apiUrls } from 'lib/apiUrls';
 
 import { dateFormat } from 'constants/date';
 
+import { getSWRConfig } from 'lib/swr-config';
+
 import { useDate } from './datepicker-provider';
 import { useVault } from './vault-provider';
 
@@ -30,20 +32,24 @@ export const OverviewContextProvider = (props: any) => {
 	
 	// Only make API calls when vault is loaded
 	const shouldFetch = currentVault && !vaultLoading;
+	const swrConfig = getSWRConfig('dynamic');
 	
 	const {
 		data: expensesData = [],
 		isLoading: isExpenseLoading,
 		mutate: mutateExpenses,
-	} = useSWR(shouldFetch ? apiUrls.expenses.getExpenses({ from, to }) + `&vaultId=${currentVault.id}` : null);
+	} = useSWR(shouldFetch ? apiUrls.expenses.getExpenses({ from, to }) + `&vaultId=${currentVault.id}` : null, swrConfig);
 	const { data: investmentsData = [], isLoading: isInvestmentsLoading } = useSWR(
-		shouldFetch ? apiUrls.investments.getInvestments({ from, to }) + `&vaultId=${currentVault.id}` : null
+		shouldFetch ? apiUrls.investments.getInvestments({ from, to }) + `&vaultId=${currentVault.id}` : null,
+		swrConfig
 	);
 	const { data: incomeData = [], isLoading: isIncomeLoading } = useSWR(
-		shouldFetch ? apiUrls.income.getIncome({ from, to }) + `&vaultId=${currentVault.id}` : null
+		shouldFetch ? apiUrls.income.getIncome({ from, to }) + `&vaultId=${currentVault.id}` : null,
+		swrConfig
 	);
 	const { data: subscriptionsData = [], isLoading: isSubscriptionsLoading } = useSWR(
-		shouldFetch ? apiUrls.subscriptions.getSubscriptions({ from, to }) + `&vaultId=${currentVault.id}` : null
+		shouldFetch ? apiUrls.subscriptions.getSubscriptions({ from, to }) + `&vaultId=${currentVault.id}` : null,
+		swrConfig
 	);
 
 	const data = {

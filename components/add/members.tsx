@@ -6,6 +6,7 @@ import { addMember, editMember } from 'app/dashboard/members/apis';
 import { toast } from 'sonner';
 
 import { useVault } from 'components/context/vault-provider';
+import { useCacheInvalidation } from 'lib/cache-invalidation';
 import CircleLoader from 'components/loader/circle';
 import Modal from 'components/modal';
 import { Button } from 'components/ui/button';
@@ -31,6 +32,7 @@ const initialState = {
 
 export default function AddMember({ show, onHide, mutate, selected, lookup }: AddMemberProps) {
 	const { currentVault } = useVault();
+	const { invalidateRelatedCaches } = useCacheInvalidation();
 	const [state, setState] = useState<any>(initialState);
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<any>(null);
@@ -56,6 +58,8 @@ export default function AddMember({ show, onHide, mutate, selected, lookup }: Ad
 			}
 			setLoading(false);
 			toast.success(isEditing ? messages.updated : messages.success);
+			// Invalidate members cache
+			await invalidateRelatedCaches('members', { vaultId: currentVault?.id });
 			if (mutate) mutate();
 			onHide();
 			setState(initialState);

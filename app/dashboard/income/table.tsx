@@ -8,6 +8,7 @@ import Add from 'components/add-button';
 import { useUser } from 'components/context/auth-provider';
 import { useData } from 'components/context/data-provider';
 import { useVault } from 'components/context/vault-provider';
+import { useCacheInvalidation } from 'lib/cache-invalidation';
 import DataTable from 'components/table/data-table';
 
 import { lookup } from 'lib/lookup';
@@ -30,6 +31,7 @@ export default function IncomeTable() {
 	const { data, loading, filter, mutate } = useData();
 	const user = useUser();
 	const { currentVault } = useVault();
+	const { invalidateRelatedCaches } = useCacheInvalidation();
 
 	const onDelete = useCallback(
 		async (id: string) => {
@@ -40,12 +42,14 @@ export default function IncomeTable() {
 				}
 				await deleteIncome(id, currentVault.id);
 				toast.success(messages.deleted);
+				// Invalidate related caches (income, accounts, overview)
+				await invalidateRelatedCaches('income', { vaultId: currentVault.id });
 				mutate();
 			} catch {
 				toast.error(messages.error);
 			}
 		},
-		[mutate, currentVault?.id]
+		[mutate, currentVault?.id, invalidateRelatedCaches]
 	);
 
 	const onEdit = useCallback(async (data: IncomeData | any) => {
