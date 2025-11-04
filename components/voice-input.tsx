@@ -75,6 +75,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 							permissionRequestedRef.current = false;
 							setHasPermission(false);
 							// Try to request permission - maybe user just enabled it
+							// Note: checkPermission is accessible in closure even though defined later
 							const hasPermissionResult = await checkPermission();
 							if (!hasPermissionResult) {
 								toast.error('Microphone permission denied. Please enable microphone access in your browser settings and try again.');
@@ -125,6 +126,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 				}
 			}
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [onResult, onListeningChange]);
 
 	// Function to check and update permission status
@@ -134,7 +136,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 		// Check if permission API is available
 		if (navigator.permissions && navigator.permissions.query) {
 			try {
-				let permissionResult;
+				let permissionResult: PermissionStatus | null = null;
 				// Try different permission name formats used by different browsers
 				const permissionNames = ['microphone', 'audio_capture', 'audio-capture'];
 				
@@ -144,7 +146,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 						if (permissionResult) break;
 					} catch {
 						try {
-							permissionResult = await (navigator.permissions as any).query({ name: permName });
+							permissionResult = await (navigator.permissions as any).query({ name: permName }) as PermissionStatus;
 							if (permissionResult) break;
 						} catch {
 							continue;
@@ -158,7 +160,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 					
 					// Listen for permission changes
 					permissionResult.onchange = () => {
-						setHasPermission(permissionResult.state === 'granted');
+						setHasPermission(permissionResult!.state === 'granted');
 					};
 				} else {
 					// None of the permission names worked, try getUserMedia as fallback
@@ -200,7 +202,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 			try {
 				// Try different permission name formats used by different browsers
 				const permissionNames = ['microphone', 'audio_capture', 'audio-capture'];
-				let permissionResult;
+				let permissionResult: PermissionStatus | null = null;
 				
 				for (const permName of permissionNames) {
 					try {
@@ -208,7 +210,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 						if (permissionResult) break;
 					} catch {
 						try {
-							permissionResult = await (navigator.permissions as any).query({ name: permName });
+							permissionResult = await (navigator.permissions as any).query({ name: permName }) as PermissionStatus;
 							if (permissionResult) break;
 						} catch {
 							continue;
@@ -268,6 +270,7 @@ const VoiceInput = forwardRef<VoiceInputRef, VoiceInputProps>(
 	// Check permission status on mount and when permission might change
 	useEffect(() => {
 		refreshPermissionStatus();
+		// refreshPermissionStatus doesn't need to be in deps as it's stable and only depends on isSupported
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isSupported]);
 
