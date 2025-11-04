@@ -14,16 +14,24 @@ interface ModalProps {
 	children: any;
 	onHide: () => void;
 	someRef: any;
+	blockClose?: boolean;
+	listeningOverlay?: React.ReactNode;
 }
 
-export default function Modal({ show, title, children, onHide, someRef }: ModalProps) {
+export default function Modal({ show, title, children, onHide, someRef, blockClose = false, listeningOverlay }: ModalProps) {
 	const isDesktop = true; // useMediaQuery('(min-width: 768px)');
+
+	const handleClose = () => {
+		if (!blockClose) {
+			onHide();
+		}
+	};
 
 	return (
 		<>
 			{isDesktop ? (
 				<Transition appear show={show} as={Fragment}>
-					<Dialog initialFocus={someRef} open={show} as="div" className={`relative z-20 `} onClose={onHide}>
+					<Dialog initialFocus={someRef} open={show} as="div" className={`relative z-20 `} onClose={handleClose}>
 						<Transition.Child
 							as={Fragment}
 							enter="ease-out duration-500"
@@ -46,20 +54,30 @@ export default function Modal({ show, title, children, onHide, someRef }: ModalP
 									leaveFrom="opacity-100"
 									leaveTo="opacity-0"
 								>
-									<Dialog.Panel className="fixed bottom-0 w-full transform overflow-hidden bg-background p-4 text-left align-middle text-primary  shadow-lg transition-all sm:static sm:max-w-md sm:rounded-lg sm:border sm:border-border">
-										<Dialog.Title
-											as="h2"
-											className="mb-3 mt-[-4px] flex w-full items-center text-lg font-semibold text-primary"
-										>
-											{title}
-											<button
-												onClick={onHide}
-												className="absolute right-[4px] top-[3px] flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-primary transition-all duration-75 hover:bg-secondary focus:outline-none active:bg-secondary"
+									<Dialog.Panel className="fixed bottom-0 w-full transform overflow-hidden bg-background p-4 text-left align-middle text-primary  shadow-lg transition-all sm:static sm:max-w-md sm:rounded-lg sm:border sm:border-border relative">
+										{listeningOverlay && (
+											<div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-sm rounded-lg flex items-center justify-center">
+												{listeningOverlay}
+											</div>
+										)}
+										<div className={listeningOverlay ? 'pointer-events-none opacity-50' : ''}>
+											<Dialog.Title
+												as="h2"
+												className="mb-3 mt-[-4px] flex w-full items-center text-lg font-semibold text-primary"
 											>
-												<X className="h-5 w-5 text-primary" />
-											</button>
-										</Dialog.Title>
-										{children}
+												{title}
+												<button
+													onClick={handleClose}
+													disabled={blockClose}
+													className={`absolute right-[4px] top-[3px] flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-primary transition-all duration-75 hover:bg-secondary focus:outline-none active:bg-secondary ${
+														blockClose ? 'opacity-50 cursor-not-allowed' : ''
+													}`}
+												>
+													<X className="h-5 w-5 text-primary" />
+												</button>
+											</Dialog.Title>
+											{children}
+										</div>
 									</Dialog.Panel>
 								</Transition.Child>
 							</div>
@@ -68,12 +86,19 @@ export default function Modal({ show, title, children, onHide, someRef }: ModalP
 				</Transition>
 			) : (
 				<Drawer open={show}>
-					<DrawerOverlay onClick={onHide} />
-					<DrawerContent className="text-primary">
-						<DrawerHeader className="text-left">
-							<DrawerTitle>{title}</DrawerTitle>
-						</DrawerHeader>
-						<div className="p-4 pt-0 pb-8">{children}</div>
+					<DrawerOverlay onClick={handleClose} />
+					<DrawerContent className="text-primary relative">
+						{listeningOverlay && (
+							<div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center">
+								{listeningOverlay}
+							</div>
+						)}
+						<div className={listeningOverlay ? 'pointer-events-none opacity-50' : ''}>
+							<DrawerHeader className="text-left">
+								<DrawerTitle>{title}</DrawerTitle>
+							</DrawerHeader>
+							<div className="p-4 pt-0 pb-8">{children}</div>
+						</div>
 					</DrawerContent>
 				</Drawer>
 			)}
