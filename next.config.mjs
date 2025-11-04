@@ -5,7 +5,12 @@ const nextConfig = {
 		domains: ['www.google.com'],
 	},
 	async headers() {
-		return [{ source: '/(.*)', headers: securityHeaders }];
+		return [
+			// Apply security headers to all routes
+			{ source: '/(.*)', headers: securityHeaders },
+			// Apply no-cache headers to API routes
+			{ source: '/api/(.*)', headers: apiHeaders },
+		];
 	},
 };
 
@@ -55,6 +60,27 @@ const securityHeaders = [
 	{
 		key: 'Permissions-Policy',
 		value: 'camera=(), microphone=(self), geolocation=(), autoplay=()',
+	},
+	// Cache control for HTML pages - always revalidate
+	{
+		key: 'Cache-Control',
+		value: 'public, max-age=0, must-revalidate',
+	},
+];
+
+// Headers for API routes
+const apiHeaders = [
+	{
+		key: 'Cache-Control',
+		value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+	},
+	{
+		key: 'Pragma',
+		value: 'no-cache',
+	},
+	{
+		key: 'Expires',
+		value: '0',
 	},
 ];
 

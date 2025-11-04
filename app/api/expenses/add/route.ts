@@ -28,9 +28,13 @@ export async function POST(request: NextRequest) {
 					member_id: member_id || null,
 				},
 			});
-			return NextResponse.json('added', { status: 201 });
+			const response = NextResponse.json('added', { status: 201 });
+			response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return response;
 		} catch (error) {
-			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			const errorResponse = NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return errorResponse;
 		}
 	}, false);
 }

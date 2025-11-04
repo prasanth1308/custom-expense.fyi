@@ -28,12 +28,16 @@ export async function GET(request: NextRequest) {
 		try {
 			// Check vault permission
 			if (!vaultId) {
-				return NextResponse.json({ message: 'Vault ID is required' }, { status: 400 });
+				const response = NextResponse.json({ message: 'Vault ID is required' }, { status: 400 });
+			response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return response;
 			}
 
 			const hasPermission = await checkVaultPermission(user.id, vaultId, 'read');
 			if (!hasPermission) {
-				return NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+				const response = NextResponse.json({ message: 'Insufficient permissions for this vault' }, { status: 403 });
+				response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+				return response;
 			}
 
 			const where = {
@@ -76,9 +80,16 @@ export async function GET(request: NextRequest) {
 					},
 				},
 			});
-			return NextResponse.json(data.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)));
+			const response = NextResponse.json(data.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)));
+			// Prevent caching
+			response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+			response.headers.set('Pragma', 'no-cache');
+			response.headers.set('Expires', '0');
+			return response;
 		} catch (error) {
-			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			const errorResponse = NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return errorResponse;
 		}
 	});
 }
@@ -100,9 +111,13 @@ export async function DELETE(request: NextRequest) {
 			await prisma.expenses.delete({
 				where: { id: id[0] },
 			});
-			return NextResponse.json('deleted', { status: 200 });
+			const response = NextResponse.json('deleted', { status: 200 });
+			response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return response;
 		} catch (error) {
-			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			const errorResponse = NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return errorResponse;
 		}
 	});
 }
@@ -129,9 +144,13 @@ export async function PUT(request: NextRequest) {
 				data: updateData,
 				where: { id },
 			});
-			return NextResponse.json('updated', { status: 200 });
+			const response = NextResponse.json('updated', { status: 200 });
+			response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return response;
 		} catch (error) {
-			return NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			const errorResponse = NextResponse.json({ error, message: messages.request.failed }, { status: 500 });
+			errorResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+			return errorResponse;
 		}
 	});
 }
