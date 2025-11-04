@@ -13,12 +13,15 @@ import { useUser } from 'components/context/auth-provider';
 import { useVault } from 'components/context/vault-provider';
 import CircleLoader from 'components/loader/circle';
 import Modal from 'components/modal';
+import VoiceInput, { VoiceInputRef } from 'components/voice-input';
 import { Button } from 'components/ui/button';
 import { Input } from 'components/ui/input';
 import { Label } from 'components/ui/label';
 import { Textarea } from 'components/ui/textarea';
+import { Mic, MicOff } from 'lucide-react';
 
 import { getCurrencySymbol } from 'lib/formatter';
+import { parseVoiceInput } from 'lib/voice-parser';
 
 import { expensesCategory, expensesPay, groupedExpenses } from 'constants/categories';
 import { dateFormat, datePattern } from 'constants/date';
@@ -53,6 +56,9 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 	const [loading, setLoading] = useState(false);
 	const [accounts, setAccounts] = useState<any[]>([]);
 	const [members, setMembers] = useState<any[]>([]);
+	const [isVoiceListening, setIsVoiceListening] = useState(false);
+	const [isVoiceProcessing, setIsVoiceProcessing] = useState(false);
+	const voiceInputRef = useRef<VoiceInputRef>(null);
 	const inputRef = useRef<any>(null);
 
 	useEffect(() => {
@@ -102,6 +108,76 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 		return debounce(callbackHandler, 500);
 	}, [lookup]);
 
+	const handleVoiceResult = (text: string) => {
+		setIsVoiceProcessing(true);
+		try {
+			const parsed = parseVoiceInput(text, accounts, members, expensesPay);
+			setState((prev: any) => ({
+				...prev,
+				// Only update if parsed value exists (not empty)
+				...(parsed.name && { name: parsed.name }),
+				...(parsed.price && { price: parsed.price }),
+				...(parsed.account_id && { account_id: parsed.account_id }),
+				...(parsed.paid_via && { paid_via: parsed.paid_via }),
+				...(parsed.member_id !== null && { member_id: parsed.member_id }),
+			}));
+			toast.success('Voice input processed successfully');
+		} catch (error) {
+			console.error('Error parsing voice input:', error);
+			toast.error('Failed to parse voice input. Please try again.');
+		} finally {
+			setTimeout(() => {
+				setIsVoiceProcessing(false);
+			}, 500);
+		}
+	};
+
+	const handleVoiceListeningChange = (listening: boolean) => {
+		setIsVoiceListening(listening);
+	};
+
+	const handleStopListening = () => {
+		// Stop listening by calling the stop function from VoiceInput
+		if (voiceInputRef.current?.stopListening) {
+			voiceInputRef.current.stopListening();
+		}
+	};
+
+	// Create listening overlay
+	const listeningOverlay = isVoiceListening || isVoiceProcessing ? (
+		<div className="flex flex-col items-center justify-center gap-4 p-8">
+			<div className="relative">
+				<div className="h-20 w-20 rounded-full border-4 border-primary/20" />
+				<div className="absolute inset-0 flex items-center justify-center">
+					<Mic className="h-10 w-10 text-primary animate-pulse" />
+				</div>
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="h-20 w-20 rounded-full border-4 border-primary animate-ping opacity-75" />
+				</div>
+			</div>
+			<div className="text-center">
+				<h3 className="text-lg font-semibold text-primary mb-2">
+					{isVoiceProcessing ? 'Processing...' : 'Listening...'}
+				</h3>
+				<p className="text-sm text-muted-foreground mb-4">
+					{isVoiceProcessing
+						? 'Please wait while we process your voice input'
+						: 'Speak your expense details now'}
+				</p>
+				<Button
+					type="button"
+					variant="destructive"
+					size="sm"
+					onClick={handleStopListening}
+					className="flex items-center gap-2"
+				>
+					<MicOff className="h-4 w-4" />
+					Stop Listening
+				</Button>
+			</div>
+		</div>
+	) : null;
+
 	const onSubmit = async () => {
 		try {
 			setLoading(true);
@@ -126,7 +202,14 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 	};
 
 	return (
-		<Modal someRef={inputRef} show={show} title={`${selected.id ? 'Edit' : 'Add'} Expense`} onHide={onHide}>
+		<Modal 
+			someRef={inputRef} 
+			show={show} 
+			title={`${selected.id ? 'Edit' : 'Add'} Expense`} 
+			onHide={onHide}
+			blockClose={isVoiceListening || isVoiceProcessing}
+			listeningOverlay={listeningOverlay}
+		>
 			<div className="sm:flex sm:items-start max-sm:pb-6">
 				<form
 					className="md:[420px] grid w-full grid-cols-1 items-center gap-3"
@@ -137,11 +220,20 @@ export default function AddExpense({ show, onHide, mutate, selected, lookup }: A
 					}}
 				>
 					<div className="relative">
-						<Label htmlFor="name">Name</Label>
+						<div className="flex items-center justify-between mb-1.5">
+							<Label htmlFor="name">Name</Label>
+							<VoiceInput 
+								ref={voiceInputRef}
+								onResult={handleVoiceResult} 
+								onListeningChange={handleVoiceListeningChange}
+								onStopRequested={handleStopListening}
+								disabled={loading || !show} 
+							/>
+						</div>
 						<Input
 							className="mt-1.5"
 							id="name"
-							placeholder="Swiggy - Biriyani"
+							placeholder="Swiggy - Biriyani or use voice: 'milk 30 HDFC UPI Family'"
 							maxLength={30}
 							required
 							ref={inputRef}
