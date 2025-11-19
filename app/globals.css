@@ -2,189 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-*,
-::after,
-::before {
-	box-sizing: border-box;
-}
-
-html {
-	height: 100%;
-}
-
 @layer base {
 	:root {
 		--background: 0 0% 100%;
-		--foreground: 240 10% 3.9%;
-
-		--muted: 240 4.8% 95.9%;
-		--muted-foreground: 240 3.8% 46.1%;
-
-		--popover: 0 0% 100%;
-		--popover-foreground: 240 10% 3.9%;
-
+		--foreground: 222.2 84% 4.9%;
 		--card: 0 0% 100%;
-		--card-foreground: 240 10% 3.9%;
-
-		--border: 240 5.9% 90%;
-		--input: 240 5.9% 90%;
-
-		--primary: 240 5.9% 10%;
-		--primary-foreground: 0 0% 98%;
-
-		--secondary: 240 4.8% 95.9%;
-		--secondary-foreground: 240 5.9% 10%;
-
-		--accent: 240 4.8% 95.9%;
-		--accent-foreground: 240 5.9% 10%;
-
+		--card-foreground: 222.2 84% 4.9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 222.2 84% 4.9%;
+		--primary: 222.2 47.4% 11.2%;
+		--primary-foreground: 210 40% 98%;
+		--secondary: 210 40% 96.1%;
+		--secondary-foreground: 222.2 47.4% 11.2%;
+		--muted: 210 40% 96.1%;
+		--muted-foreground: 215.4 16.3% 46.9%;
+		--accent: 210 40% 96.1%;
+		--accent-foreground: 222.2 47.4% 11.2%;
 		--destructive: 0 84.2% 60.2%;
-		--destructive-foreground: 0 0% 98%;
-
-		--ring: 240 5% 64.9%;
-
+		--destructive-foreground: 210 40% 98%;
+		--border: 214.3 31.8% 91.4%;
+		--input: 214.3 31.8% 91.4%;
+		--ring: 222.2 84% 4.9%;
 		--radius: 0.5rem;
 	}
 
 	.dark {
-		--background: 240 10% 3.9%;
-		--foreground: 0 0% 98%;
-
-		--muted: 240 3.7% 15.9%;
-		--muted-foreground: 240 5% 64.9%;
-
-		--popover: 240 10% 3.9%;
-		--popover-foreground: 0 0% 98%;
-
-		--card: 240 10% 3.9%;
-		--card-foreground: 0 0% 98%;
-
-		--border: 240 3.7% 15.9%;
-		--input: 240 3.7% 15.9%;
-
-		--primary: 0 0% 98%;
-		--primary-foreground: 240 5.9% 10%;
-
-		--secondary: 240 3.7% 15.9%;
-		--secondary-foreground: 0 0% 98%;
-
-		--accent: 240 3.7% 15.9%;
-		--accent-foreground: 0 0% 98%;
-
+		--background: 222.2 84% 4.9%;
+		--foreground: 210 40% 98%;
+		--card: 222.2 84% 4.9%;
+		--card-foreground: 210 40% 98%;
+		--popover: 222.2 84% 4.9%;
+		--popover-foreground: 210 40% 98%;
+		--primary: 210 40% 98%;
+		--primary-foreground: 222.2 47.4% 11.2%;
+		--secondary: 217.2 32.6% 17.5%;
+		--secondary-foreground: 210 40% 98%;
+		--muted: 217.2 32.6% 17.5%;
+		--muted-foreground: 215 20.2% 65.1%;
+		--accent: 217.2 32.6% 17.5%;
+		--accent-foreground: 210 40% 98%;
 		--destructive: 0 62.8% 30.6%;
-		--destructive-foreground: 0 85.7% 97.3%;
-
-		--ring: 240 3.7% 15.9%;
-	}
-
-	/* Color Scheme 1: Blue */
-	.color-scheme-blue {
-		--primary: 221 83% 53%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-blue.dark {
-		--primary: 217 91% 60%;
-		--primary-foreground: 222 47% 11%;
-	}
-
-	/* Color Scheme 2: Purple */
-	.color-scheme-purple {
-		--primary: 262 83% 58%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-purple.dark {
-		--primary: 263 70% 50.4%;
-		--primary-foreground: 210 20% 98%;
-	}
-
-	/* Color Scheme 3: Green */
-	.color-scheme-green {
-		--primary: 142 76% 36%;
-		--primary-foreground: 355 100% 97%;
-	}
-
-	.color-scheme-green.dark {
-		--primary: 142 71% 45%;
-		--primary-foreground: 144 61% 20%;
-	}
-
-	/* Color Scheme 4: Red */
-	.color-scheme-red {
-		--primary: 0 72% 51%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-red.dark {
-		--primary: 0 63% 31%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	/* Color Scheme 5: Orange */
-	.color-scheme-orange {
-		--primary: 25 95% 53%;
-		--primary-foreground: 60 9% 98%;
-	}
-
-	.color-scheme-orange.dark {
-		--primary: 24 96% 53%;
-		--primary-foreground: 60 9% 10%;
-	}
-
-	/* Color Scheme 6: Teal */
-	.color-scheme-teal {
-		--primary: 173 80% 40%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-teal.dark {
-		--primary: 174 81% 51%;
-		--primary-foreground: 178 100% 97%;
-	}
-
-	/* Color Scheme 7: Pink */
-	.color-scheme-pink {
-		--primary: 330 81% 60%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-pink.dark {
-		--primary: 346 77% 49.8%;
-		--primary-foreground: 355 100% 97%;
-	}
-
-	/* Color Scheme 8: Indigo */
-	.color-scheme-indigo {
-		--primary: 239 84% 67%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-indigo.dark {
-		--primary: 234 89% 74%;
-		--primary-foreground: 224 71% 4%;
-	}
-
-	/* Color Scheme 9: Amber */
-	.color-scheme-amber {
-		--primary: 43 96% 56%;
-		--primary-foreground: 20 14% 4%;
-	}
-
-	.color-scheme-amber.dark {
-		--primary: 48 96% 53%;
-		--primary-foreground: 20 14% 4%;
-	}
-
-	/* Color Scheme 10: Cyan */
-	.color-scheme-cyan {
-		--primary: 188 94% 42%;
-		--primary-foreground: 0 0% 98%;
-	}
-
-	.color-scheme-cyan.dark {
-		--primary: 187 100% 45%;
-		--primary-foreground: 186 100% 98%;
+		--destructive-foreground: 210 40% 98%;
+		--border: 217.2 32.6% 17.5%;
+		--input: 217.2 32.6% 17.5%;
+		--ring: 212.7 26.8% 83.9%;
 	}
 }
 
@@ -194,5 +55,17 @@ html {
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+}
+
+/* Waveform animation for voice listening */
+@keyframes waveform {
+	0%, 100% {
+		height: 20px;
+		opacity: 0.7;
+	}
+	50% {
+		height: 60px;
+		opacity: 1;
 	}
 }

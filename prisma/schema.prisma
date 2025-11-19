@@ -15,20 +15,21 @@ datasource db {
 }
 
 model vaults {
-  name          String
-  description   String?
-  created_at    DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
-  owner_id      String          @db.Uuid
-  id            String          @id @default(uuid()) @db.Uuid
-  expenses      expenses[]
-  income        income[]
-  investments   investments[]
-  subscriptions subscriptions[]
-  vault_members vault_members[]
-  accounts      accounts[]
-  members       members[]
-  owner         users           @relation("VaultOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  owner_id        String            @db.Uuid
+  id              String            @id @default(uuid()) @db.Uuid
+  expenses        expenses[]
+  income          income[]
+  investments     investments[]
+  subscriptions   subscriptions[]
+  vault_members   vault_members[]
+  accounts        accounts[]
+  members         members[]
+  tax_pnl_uploads tax_pnl_uploads[]
+  owner           users             @relation("VaultOwner", fields: [owner_id], references: [id], onDelete: Cascade)
 }
 
 model vault_members {
@@ -213,4 +214,46 @@ model contact {
   email      String
   created_at DateTime @default(now()) @db.Timestamptz(6)
   name       String?
+}
+
+model tax_pnl_uploads {
+  id          String             @id @default(uuid()) @db.Uuid
+  vault_id    String             @db.Uuid
+  provider    String
+  file_name   String
+  uploaded_at DateTime           @default(now()) @db.Timestamptz(6)
+  created_at  DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  vault       vaults             @relation(fields: [vault_id], references: [id], onDelete: Cascade)
+  holdings    tax_pnl_holdings[]
+
+  @@index([vault_id])
+}
+
+model tax_pnl_holdings {
+  id                  String          @id @default(uuid()) @db.Uuid
+  upload_id           String          @db.Uuid
+  /// @encrypted
+  symbol              String
+  /// @encrypted
+  quantity            String          @default("0")
+  /// @encrypted
+  quantity_long_term  String          @default("0")
+  /// @encrypted
+  average_price       String          @default("0")
+  /// @encrypted
+  current_price       String          @default("0")
+  purchase_date       String
+  /// @encrypted
+  pnl                 String          @default("0")
+  /// @encrypted
+  pnl_percentage      String          @default("0")
+  holding_period_days Int
+  is_long_term        Boolean         @default(false)
+  created_at          DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  upload              tax_pnl_uploads @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+
+  @@index([upload_id])
+  @@index([is_long_term])
 }

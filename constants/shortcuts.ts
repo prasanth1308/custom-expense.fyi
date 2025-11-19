@@ -13,6 +13,7 @@ const shortcuts = {
 		subscriptions: { shortcut: 's', text: 'subscriptions' },
 		accounts: { shortcut: 'c', text: 'accounts' },
 		members: { shortcut: 'm', text: 'members' },
+		taxPnl: { shortcut: 't', text: 'tax p&l analyser' },
 	},
 };
 

@@ -39,17 +39,17 @@ export default function Modal({ show, title, children, onHide, someRef }: ModalP
 							<div className="flex min-h-full items-center justify-center text-center">
 								<Transition.Child
 									as={Fragment}
-									enter="ease-out duration-300"
-									enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-									enterTo="opacity-100 translate-y-0 sm:scale-100"
-									leave="ease-out duration-100"
-									leaveFrom="opacity-100"
-									leaveTo="opacity-0"
+									enter="ease-out duration-500"
+									enterFrom="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-90 sm:rotate-[-2deg]"
+									enterTo="opacity-100 translate-y-0 sm:scale-100 sm:rotate-0"
+									leave="ease-in duration-200"
+									leaveFrom="opacity-100 translate-y-0 sm:scale-100 sm:rotate-0"
+									leaveTo="opacity-0 translate-y-4 sm:scale-95 sm:rotate-2"
 								>
-									<Dialog.Panel className="fixed bottom-0 w-full transform overflow-hidden bg-background p-4 text-left align-middle text-primary  shadow-lg transition-all sm:static sm:max-w-md sm:rounded-lg sm:border sm:border-border">
+									<Dialog.Panel className="fixed bottom-0 w-full transform overflow-hidden bg-background p-4 text-left align-middle text-primary shadow-2xl transition-all sm:static sm:max-w-md sm:rounded-lg sm:border sm:border-border animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4">
 										<Dialog.Title
 											as="h2"
-											className="mb-3 mt-[-4px] flex w-full items-center text-lg font-semibold text-primary"
+											className="mb-3 mt-[-4px] flex w-full items-center text-lg font-semibold text-primary animate-in fade-in-0 slide-in-from-top-2 duration-300"
 										>
 											{title}
 											<button
@@ -59,7 +59,9 @@ export default function Modal({ show, title, children, onHide, someRef }: ModalP
 												<X className="h-5 w-5 text-primary" />
 											</button>
 										</Dialog.Title>
-										{children}
+										<div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100">
+											{children}
+										</div>
 									</Dialog.Panel>
 								</Transition.Child>
 							</div>

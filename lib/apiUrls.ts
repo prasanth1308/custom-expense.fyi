@@ -38,4 +38,9 @@ export const apiUrls = {
 		modify: '/api/members',
 		getMembers: () => '/api/members',
 	},
+	taxPnl: {
+		upload: '/api/tax-pnl/upload',
+		holdings: '/api/tax-pnl/holdings',
+		compare: '/api/tax-pnl/compare',
+	},
 };

@@ -21,6 +21,7 @@ import {
 	SignoutIcon,
 	SubscriptionsIcon,
 	SupportIcon,
+	TaxPnlIcon,
 } from 'components/icons';
 import { Separator } from 'components/ui/separator';
 
@@ -46,6 +47,12 @@ const dashboardLinks = [
 		href: '/subscriptions',
 		Icon: SubscriptionsIcon,
 		shortcutText: shortcuts.menu.subscriptions.shortcut,
+	},
+	{
+		name: 'Tax P&L Analyser',
+		href: '/tax-pnl-analyser',
+		Icon: TaxPnlIcon,
+		shortcutText: shortcuts.menu.taxPnl.shortcut,
 	},
 	{
 		name: 'Accounts',
@@ -88,6 +95,7 @@ export default function Sidebar() {
 			if (keys === shortcuts.menu.expenses.shortcut) router.push('/expenses');
 			if (keys === shortcuts.menu.investments.shortcut) router.push('/investments');
 			if (keys === shortcuts.menu.subscriptions.shortcut) router.push('/subscriptions');
+			if (keys === shortcuts.menu.taxPnl.shortcut) router.push('/tax-pnl-analyser');
 		},
 		options
 	);

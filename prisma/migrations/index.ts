@@ -7,6 +7,7 @@ import { migrate as migrateincome } from './income'
 import { migrate as migrateinvestments } from './investments'
 import { migrate as migrateaccounts } from './accounts'
 import { migrate as migratemembers } from './members'
+import { migrate as migratetax_pnl_holdings } from './tax_pnl_holdings'
 
 export interface ProgressReport {
   model: string
@@ -30,7 +31,7 @@ export const defaultProgressReport: ProgressReportCallback = ({
     .toString()
     .padStart(3)
   console.info(
-    `${model.padEnd(13)} ${pct}% processed ${processed
+    `${model.padEnd(16)} ${pct}% processed ${processed
       .toString()
       .padStart(length)} / ${totalCount} (took ${performance.toFixed(2)}ms)`
   )
@@ -44,7 +45,8 @@ export type MigrationReport = {
   income: number,
   investments: number,
   accounts: number,
-  members: number
+  members: number,
+  tax_pnl_holdings: number
 }
 
 /**
@@ -57,6 +59,7 @@ export type MigrationReport = {
  * - investments
  * - accounts
  * - members
+ * - tax_pnl_holdings
  *
  * @returns a dictionary of the number of processed records per model.
  */
@@ -70,12 +73,14 @@ export async function migrate(
   const processedinvestments = await migrateinvestments(client, reportProgress)
   const processedaccounts = await migrateaccounts(client, reportProgress)
   const processedmembers = await migratemembers(client, reportProgress)
+  const processedtax_pnl_holdings = await migratetax_pnl_holdings(client, reportProgress)
   return {
     subscriptions: processedsubscriptions,
     expenses: processedexpenses,
     income: processedincome,
     investments: processedinvestments,
     accounts: processedaccounts,
-    members: processedmembers
+    members: processedmembers,
+    tax_pnl_holdings: processedtax_pnl_holdings
   }
 }

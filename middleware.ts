@@ -29,6 +29,7 @@ export async function middleware(req: NextRequest) {
 		url.pathname.startsWith('/subscriptions') || 
 		url.pathname.startsWith('/accounts') || 
 		url.pathname.startsWith('/members') || 
+		url.pathname.startsWith('/tax-pnl-analyser') || 
 		url.pathname.startsWith('/settings')) {
 		
 		// If it's already a dashboard route, let it pass through
