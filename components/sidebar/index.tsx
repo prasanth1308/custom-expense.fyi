@@ -55,6 +55,12 @@ const dashboardLinks = [
 		shortcutText: shortcuts.menu.taxPnl.shortcut,
 	},
 	{
+		name: 'LTCG Compare',
+		href: '/ltcg-compare',
+		Icon: TaxPnlIcon,
+		shortcutText: undefined,
+	},
+	{
 		name: 'Accounts',
 		href: '/accounts',
 		Icon: AccountsIcon,
